@@ -1,0 +1,99 @@
+<div class="register-container">
+  <p-card class="register-card">
+    <h2>Create Account</h2>
+
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+
+      <!-- NAME -->
+      <p-floatLabel variant="on">
+        <input
+          type="text"
+          id="name"
+          pInputText
+          formControlName="name"
+        />
+        <label for="name">Full Name</label>
+      </p-floatLabel>
+    <div class="error" *ngIf="name?.touched && name?.invalid">
+        Name is required.
+    </div>
+
+      <!-- EMAIL -->
+      <p-floatLabel variant="on">
+        <input
+          type="email"
+          id="email"
+          pInputText
+          formControlName="email"
+        />
+        <label for="email">Email</label>
+      </p-floatLabel>
+    <div class="error" *ngIf="email?.touched && email?.invalid">
+        Valid email is required.
+    </div>
+
+    <!-- PASSWORD -->
+    <div class="float-container">
+        <p-floatLabel variant="on">
+            <input
+            id="password"
+            pPassword
+            formControlName="password"
+            toggleMask="true"
+            inputClass="p-password-input"
+            />
+            <label for="password">Password</label>
+        </p-floatLabel>
+
+        <div class="error" *ngIf="password?.touched && password?.invalid">
+            Password must be at least 6 characters.
+        </div>
+    </div>
+
+      <!-- CONFIRM PASSWORD -->
+      <div class="float-container">
+        <p-floatLabel variant="on">
+            <input
+            id="confirmPassword"
+            pPassword
+            formControlName="confirmPassword"
+            toggleMask="true"
+            inputClass="p-password-input"
+            />
+            <label for="confirmPassword">Confirm Password</label>
+        </p-floatLabel>
+
+        <div class="error" *ngIf="confirmPassword?.touched && confirmPassword?.invalid">
+            Confirm your password.
+        </div>
+
+        <div class="error" *ngIf="registerForm.errors?.['passwordMismatch']">
+            Passwords do not match.
+        </div>
+    </div>
+
+      <!-- SERVER ERROR -->
+      <p-message
+        *ngIf="errorMessage"
+        severity="error"
+        [text]="errorMessage"
+        class="server-error"
+      ></p-message>
+
+      <!-- SUBMIT BUTTON -->
+      <button
+        pButton
+        type="submit"
+        label="Create Account"
+        class="w-full"
+        [disabled]="isLoading || registerForm.invalid"
+      ></button>
+
+    </form>
+
+    <p class="switch-text">
+      Already have an account?
+      <a routerLink="/login">Login</a>
+    </p>
+  </p-card>
+</div>

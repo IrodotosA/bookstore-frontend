@@ -1,0 +1,64 @@
+.login-page {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: var(--p-surface-100); // Light background
+}
+
+/* Card styling */
+.login-card {
+  width: 380px;
+  padding: 2rem;
+  border-radius: 12px;
+}
+
+/* Title */
+.title {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+}
+
+/* Form layout */
+.form-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Email input full width */
+.input-field {
+  width: 100%;
+}
+
+/* Fix password width (PrimeNG quirk) */
+:host ::ng-deep .password-wrapper {
+  width: 100%;
+}
+
+:host ::ng-deep .p-password-input,
+:host ::ng-deep .password-input {
+  width: 100% !important;
+}
+
+/* Button */
+.login-btn {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.switch-text {
+  margin-top: 1.5rem;
+  text-align: center;
+
+  a {
+    color: var(--p-primary-600);
+    text-decoration: none;
+    cursor: pointer;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}

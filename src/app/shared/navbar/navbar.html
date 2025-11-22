@@ -1,0 +1,30 @@
+<nav class="navbar">
+  <div class="nav-left">
+    <a routerLink="/" class="logo">BookStore</a>
+  </div>
+
+  <div class="nav-links">
+    <a routerLink="/">Home</a>
+    <a routerLink="/shop">Shop</a>
+  </div>
+
+  <div class="nav-right">
+
+    <!-- CART ICON ALWAYS VISIBLE -->
+    <button class="icon-btn" routerLink="/cart">
+      <i class="pi pi-shopping-cart"></i>
+    </button>
+
+    <!-- SHOW LOGIN WHEN NOT AUTHENTICATED -->
+    <div *ngIf="!auth.isLoggedIn()">
+        <button routerLink="/login">Login</button>
+        <button routerLink="/register">Register</button>
+    </div>
+
+    <!-- SHOW LOGOUT WHEN AUTHENTICATED -->
+    <button (click)="logout()" *ngIf="auth.isLoggedIn()">
+      Logout
+    </button>
+
+  </div>
+</nav>

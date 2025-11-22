@@ -1,0 +1,54 @@
+.register-container {
+    display: flex;
+    height: 100vh;
+    justify-content: center;
+    align-items: center;
+    padding-top: 5rem;
+    background: var(--p-surface-100); // Light background
+}
+
+.register-card {
+  width: 420px;
+  padding: 2rem !important;
+}
+
+p-floatLabel,
+p-password,
+input {
+  width: 100% !important;
+  margin-top: 8px;
+}
+
+// p-floatLabel {
+//   margin-bottom: 1.2rem;
+// }
+
+button {
+  margin-top: 1rem;
+}
+
+.error {
+    color: #d32f2f;   /* red-700 */
+    font-size: 0.85rem;
+    // margin-top: -6px;   // pull the error closer to the input
+    margin-bottom: 8px; // give a bit of space before next field
+}
+
+.server-error {
+  margin-top: 1rem;
+}
+
+.switch-text {
+  margin-top: 1.5rem;
+  text-align: center;
+
+  a {
+    color: var(--p-primary-600);
+    text-decoration: none;
+    cursor: pointer;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
