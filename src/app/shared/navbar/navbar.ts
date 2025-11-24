@@ -13,6 +13,13 @@ import { AuthService } from '../../auth/auth.service';
 })
 export class Navbar {
   auth = inject(AuthService);
+  isScrolled = false;
+
+  constructor() {
+    window.addEventListener('scroll', () => {
+      this.isScrolled = window.scrollY > 50;
+    });
+  }
 
   logout() {
     this.auth.logout();

@@ -1,0 +1,262 @@
+<!-- HERO WRAPPER -->
+<div class="shop-hero">
+  <div class="shop-hero-content">
+    <h1>Discover Your Next Favorite Book</h1>
+    <p>Browse through our curated collection and find the stories that inspire you.</p>
+  </div>
+</div>
+
+<div class="filters-header">
+
+  <!-- SEARCH BAR LEFT -->
+  <p-iconfield iconPosition="left" class="w-full md:w-4">
+    <p-inputicon>
+      <i class="pi pi-search"></i>
+    </p-inputicon>
+
+    <input
+      pInputText
+      type="text"
+      placeholder="Search books..."
+      class="w-full"
+      [(ngModel)]="searchQuery"
+      (input)="applyFilters()"
+    />
+  </p-iconfield>
+
+  <!-- FILTER BUTTON RIGHT -->
+  <button 
+    pButton 
+    label="Filters" 
+    icon="pi pi-filter" 
+    class="ml-3"
+    (click)="showFilters = true">
+  </button>
+</div>
+
+<!-- DRAWER -->
+<p-drawer 
+  [(visible)]="showFilters"
+  position="right"
+  header="Filters"
+  [blockScroll]="true"
+  styleClass="filter-drawer">
+
+  <h3>Sort By</h3>
+  <p-select 
+    [options]="sortOptions"
+    optionLabel="label"
+    optionValue="value"
+    [(ngModel)]="selectedSort"
+    placeholder="Select sorting"
+    class="w-full mb-3">
+  </p-select>
+
+  <h3>Categories</h3>
+  <div 
+    *ngFor="let cat of allCategories"
+    class="flex align-items-center gap-2 mt-2">
+
+    <p-checkbox 
+      [value]="cat"
+      name="categories"
+      [(ngModel)]="selectedCategories">
+    </p-checkbox>
+
+    <label>{{ cat }}</label>
+  </div>
+
+  <button 
+    pButton 
+    label="Apply Filters" 
+    class="mt-4 w-full" 
+    (click)="applyFilters()">
+  </button>
+
+  <button 
+    pButton 
+    label="Clear Filters" 
+    class="mt-2 w-full p-button-secondary" 
+    (click)="clearFilters()">
+  </button>
+
+</p-drawer>
+
+<div class="page-container">
+  <!-- BOOK GRID -->
+  <div class="grid p-3">
+
+    <!-- Loading indicator -->
+    <div class="col-12" *ngIf="loading">
+      <p>Loading books...</p>
+    </div>
+
+    <!-- Book Cards -->
+    <div class="col-12 md:col-6 lg:col-4" *ngFor="let book of filteredBooks">
+      <p-card styleClass="h-full">
+
+        <img
+          [src]="'http://localhost:4000' + book.imageUrl"
+          [alt]="book.title"
+          class="w-full h-15rem object-cover mb-3"
+        />
+
+        <ng-template pTemplate="title">
+          {{ book.title }}
+        </ng-template>
+
+        <ng-template pTemplate="subtitle">
+          €{{ book.price }}
+        </ng-template>
+
+        <ng-template pTemplate="content">
+          <p class="book-author">Author: {{ book.author }}</p>
+          <p class="book-category">Category: {{ book.category }}</p>
+
+          <p class="truncate-text">
+            {{ book.description }}
+          </p>
+        </ng-template>
+
+        <ng-template pTemplate="footer">
+          <div class="card-footer-actions">
+            <button 
+              pButton 
+              label="Add to Cart" 
+              icon="pi pi-shopping-cart"
+              (click)="openAddToCart(book)">
+            </button>
+
+            <button 
+              pButton 
+              label="Details"
+              class="p-button-text mr-2"
+              (click)="openDetails(book)">
+            </button>
+          </div>
+        </ng-template>
+
+      </p-card>
+    </div>
+  </div>
+
+  <p-dialog
+    [(visible)]="showAddToCartDialog"
+    [modal]="true"
+    header="Add to Cart"
+    [style]="{ width: '350px' }"
+    [closable]="true">
+
+      <div *ngIf="addToCartBook">
+
+        <h2 class="mb-2">{{ addToCartBook.title }}</h2>
+        <p><strong>Price:</strong> €{{ addToCartBook.price }}</p>
+
+        <!-- Quantity -->
+        <div class="flex align-items-center gap-3 mt-3">
+
+          <button
+            pButton
+            icon="pi pi-minus"
+            (click)="decreaseQuantity()">
+          </button>
+
+          <p-inputNumber 
+            [(ngModel)]="quantity"
+            [min]="1"
+            inputStyleClass="w-3rem text-center">
+          </p-inputNumber>
+
+          <button
+            pButton
+            icon="pi pi-plus"
+            (click)="increaseQuantity()">
+          </button>
+
+        </div>
+
+        <!-- Actions -->
+        <div class="flex justify-content-end gap-2 mt-4">
+
+          <button 
+            pButton 
+            label="Cancel"
+            class="p-button-secondary"
+            (click)="showAddToCartDialog = false">
+          </button>
+
+          <button 
+            pButton 
+            label="Add"
+            icon="pi pi-check"
+            (click)="confirmAddToCart()">
+          </button>
+
+        </div>
+
+      </div>
+    </p-dialog>
+
+  <p-dialog 
+    [(visible)]="showDetailsDialog" 
+    [modal]="true"
+    [style]="{ width: '400px' }"
+    header="Book Details"
+    [closable]="true">
+
+    <!-- Loading while fetching details -->
+    <div *ngIf="!selectedBook">
+      <p>Loading details...</p>
+    </div>
+
+    <!-- Details content -->
+    <div *ngIf="selectedBook">
+
+      <img 
+        [src]="'http://localhost:4000' + selectedBook.imageUrl"
+        [alt]="selectedBook.title"
+        class="w-full mb-3 border-round">
+
+      <h2>{{ selectedBook.title }}</h2>
+      <p><strong>Author:</strong> {{ selectedBook.author }}</p>
+      <p><strong>Category:</strong> {{ selectedBook.category }}</p>
+      <p><strong>Price:</strong> €{{ selectedBook.price }}</p>
+
+      <p class="mt-3">{{ selectedBook.description }}</p>
+
+      <!-- Quantity -->
+      <div class="flex align-items-center gap-3 mt-4">
+        <label>Quantity:</label>
+
+        <button 
+          pButton 
+          icon="pi pi-minus" 
+          (click)="decreaseQuantity()">
+        </button>
+
+        <p-inputNumber 
+          [(ngModel)]="quantity"
+          [min]="1"
+          [showButtons]="false"
+          inputStyleClass="w-3rem text-center"
+          class="quantity-input">
+        </p-inputNumber>
+
+        <button 
+          pButton 
+          icon="pi pi-plus" 
+          (click)="increaseQuantity()">
+        </button>
+      </div>
+
+      <button 
+        pButton 
+        label="Add to Cart"
+        icon="pi pi-shopping-cart"
+        class="mt-4 w-full">
+      </button>
+
+    </div>
+
+  </p-dialog>
+</div>

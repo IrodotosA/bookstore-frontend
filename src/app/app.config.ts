@@ -14,33 +14,33 @@ import Lara from '@primeuix/themes/lara';
 const LaraSky = definePreset(Lara, {
   semantic: {
     primary: {
-      50: '{sky.50}',
-      100: '{sky.100}',
-      200: '{sky.200}',
-      300: '{sky.300}',
-      400: '{sky.400}',
-      500: '{sky.500}',
-      600: '{sky.600}',
-      700: '{sky.700}',
-      800: '{sky.800}',
-      900: '{sky.900}',
-      950: '{sky.950}',
+      50:  '#f8f3ee',
+      100: '#efe4d7',
+      200: '#e3ceba',
+      300: '#d2b291',
+      400: '#c08f5a',
+      500: '#a9743f',
+      600: '#8a5c32',
+      700: '#6e4728',
+      800: '#53361f',
+      900: '#3b2717',
+      950: '#25180e',
     },
     colorScheme: {
       light: {
         primary: {
-          color: '{sky.700}',
+          color: '#6e4728',        // main brown
           contrastColor: '#ffffff',
-          hoverColor: '{sky.800}',
-          activeColor: '{sky.900}',
+          hoverColor: '#53361f',   // darker brown
+          activeColor: '#3b2717',
         },
       },
       dark: {
         primary: {
-          color: '{sky.200}',
-          contrastColor: '{sky.950}',
-          hoverColor: '{sky.100}',
-          activeColor: '{sky.300}',
+          color: '#e3ceba',
+          contrastColor: '#25180e',
+          hoverColor: '#d2b291',
+          activeColor: '#c08f5a',
         },
       },
     },

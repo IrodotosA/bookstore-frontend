@@ -1,13 +1,24 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ButtonModule } from 'primeng/button';
-import { RouterModule } from '@angular/router';
+import { BookService } from '../services/book.service';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, ButtonModule, RouterModule],
+  imports: [CommonModule],
   templateUrl: './home.html',
-  styleUrl: './home.scss'
+  styleUrl: './home.scss',
 })
-export class Home {}
+export class Home implements OnInit {
+  books: any[] = [];
+
+  private bookService = inject(BookService);
+
+  ngOnInit() {
+    this.bookService.getLatestBooks(6).subscribe({
+      next: (data) => {
+        this.books = data;
+      }
+    });
+  }
+}

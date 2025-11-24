@@ -1,13 +1,18 @@
 .navbar {
-  position: sticky;
+  position: fixed;
   top: 0;
   z-index: 1000;
-
-  background-color: #333;
+  width: 100%;  
+  background-color: transparent;
   padding: 1rem 2rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
+
+   &.scrolled {
+    background-color: #25180e; /* solid dark after scroll */
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+   }
 
   .nav-left {
     font-size: 1.5rem;
@@ -29,7 +34,7 @@
       text-decoration: none;
 
       &:hover {
-        color: #78c0e0;
+        color: #d2b291;
       }
     }
   }
@@ -47,7 +52,7 @@
       cursor: pointer;
 
       &:hover {
-        color: #78c0e0;
+        color: #d2b291;
       }
     }
 
@@ -62,7 +67,7 @@
 
       &:hover {
         // background-color: #ffffff;
-        color: #78c0e0;
+        color: #d2b291;
       }
     }
   }

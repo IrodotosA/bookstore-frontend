@@ -1,0 +1,135 @@
+.truncate-text {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.shop-hero {
+  position: relative;
+  height: 220px;
+  width: 100%;
+  margin: 0;               /* << remove ANY margin */
+  padding: 0;              /* << remove padding that pushes the image down */
+  top: 0;                  /* << ensure no offset */
+
+  background-image: url('/assets/hero-banner-1.jpg');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+
+  color: white;
+
+  z-index: 0;              /* << place hero underneath navbar */
+
+  /* Dark overlay */
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 1;
+  }
+
+  /* Text sits ABOVE overlay */
+  * {
+    position: relative;
+    z-index: 2;
+  }
+}
+
+.filters-header {
+  display: flex;
+  justify-content: space-between;   /* ← spreads left & right */
+  align-items: center;
+  width: 100%;
+  margin: 2rem auto 1rem auto;       /* spacing around it */
+  max-width: 1300px;                 /* ← same as page-container */
+  padding: 0 2rem;                   /* ← same left/right padding */
+}
+
+@media (max-width: 768px) {
+  .filters-header {
+    padding: 0 0.5rem;      /* smaller spacing on phones */
+    margin-top: 1rem;     /* slightly less top space */
+  }
+}
+
+.page-container {
+  padding: 0 2rem;        /* horizontal space */
+  max-width: 1400px;      /* keeps content centered */
+  margin: 0 auto;         /* centers the container */
+}
+
+/* MOBILE FIX */
+@media (max-width: 768px) {
+  .page-container {
+    padding: 0 0.5rem;       /* tighter spacing on mobile */
+  }
+}
+
+.p-input-icon-left {
+  max-width: 320px;
+}
+
+.filter-drawer {
+  padding: 1.5rem;
+}
+
+.filter-drawer h3 {
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.book-author,
+.book-category {
+  font-size: 0.9rem;
+  margin: 0;
+  color: #555;
+}
+
+.book-author {
+  font-weight: 500;
+}
+
+.book-category {
+  opacity: 0.9;
+}
+
+.card-footer-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.shop-hero-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  color: white;
+
+  h1 {
+    font-size: 2rem;
+    margin-bottom: 0.3rem;
+    font-weight: 600;
+  }
+
+  p {
+    font-size: 1.1rem;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+}
+
+/* Make sure the content is below hero */
+.grid {
+  margin-top: 20px;
+}
