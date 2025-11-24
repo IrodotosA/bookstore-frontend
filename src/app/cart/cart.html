@@ -1,0 +1,91 @@
+<!-- HERO WRAPPER -->
+<div class="cart-hero">
+    <div class="cart-hero-content">
+        <h1>Shopping Cart</h1>
+    </div>
+</div>
+
+<div class="cart-page">
+
+  <!-- MAIN CONTAINER (TABLE + SUMMARY PANEL) -->
+  <div class="cart-layout">
+
+    <!-- CART TABLE (scrollable on mobile) -->
+    <div class="cart-table-wrapper">
+      <table class="cart-table">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Qty</th>
+            <th>Price</th>
+            <th>Subtotal</th>
+            <th></th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let item of items">
+            <td class="product-info">
+              <img [src]="'http://localhost:4000' + item.imageUrl">
+              <div>
+                <h3>{{ item.title }}</h3>
+                <p>{{ item.author }}</p>
+                <p>{{ item.category }}</p>
+              </div>
+            </td>
+
+            <td class="qty-cell">
+              <div class="qty-controls">
+                <button pButton icon="pi pi-minus" (click)="decreaseQty(item)"></button>
+
+                <p-inputNumber 
+                  [(ngModel)]="item.quantity"
+                  [min]="1"
+                  (onBlur)="manualQtyChange(item)"
+                  inputStyleClass="qty-input">
+                </p-inputNumber>
+
+                <button pButton icon="pi pi-plus" (click)="increaseQty(item)"></button>
+              </div>
+            </td>
+
+            <td>€{{ item.price }}</td>
+
+            <td class="subtotal">
+              €{{ item.price * item.quantity | number:'1.2-2' }}
+            </td>
+
+            <td class="remove-cell">
+              <button 
+                pButton 
+                icon="pi pi-trash"
+                class="p-button-danger p-button-text"
+                (click)="removeItem(item._id)">
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- SUMMARY PANEL -->
+    <div class="cart-summary">
+      <h2>What do you want to do next?</h2>
+      <p>Total: <strong>€{{ totalPrice | number:'1.2-2' }}</strong></p>
+
+      <button 
+        pButton 
+        class="p-button-secondary w-full mb-2" 
+        routerLink="/shop">
+        Continue Shopping
+      </button>
+
+      <button 
+        pButton 
+        class="w-full" 
+        label="Checkout">
+      </button>
+    </div>
+
+  </div>
+</div>

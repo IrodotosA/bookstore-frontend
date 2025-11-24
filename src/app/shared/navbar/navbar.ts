@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { RouterModule, RouterLink } from '@angular/router';
 import { AuthService } from '../../auth/auth.service';
+import { CartService } from '../../services/cart.service';
 
 @Component({
   selector: 'app-navbar',
@@ -13,6 +14,8 @@ import { AuthService } from '../../auth/auth.service';
 })
 export class Navbar {
   auth = inject(AuthService);
+  cart = inject(CartService);
+  
   isScrolled = false;
 
   constructor() {

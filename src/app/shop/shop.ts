@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { BookService } from '../services/book.service';
+import { CartService } from '../services/cart.service';
 import { FormsModule } from '@angular/forms';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
@@ -36,6 +37,12 @@ import { CommonModule } from '@angular/common';
   styleUrl: './shop.scss',
 })
 export class Shop {
+
+  constructor(
+    private bookService: BookService,
+    private cartService: CartService
+  ) {}
+
   books: any[] = [];
   filteredBooks: any[] = []
   showFilters = false;
@@ -46,7 +53,6 @@ export class Shop {
   quantity: number = 1;
   showAddToCartDialog: boolean = false;
   addToCartBook: any = null;
-  addToCartQuantity: number = 1;
 
   sortOptions = [
     { label: 'Price: Low → High', value: 'priceAsc' },
@@ -74,17 +80,18 @@ export class Shop {
   }
 
   confirmAddToCart() {
-    console.log("Add to cart:", this.addToCartBook.title, "Qty:", this.addToCartQuantity);
 
-    // in the future:
-    // this.cartService.add(this.addToCartBook, this.addToCartQuantity);
+    this.cartService.addToCart(this.addToCartBook, this.quantity);
+    this.showAddToCartDialog = false;
+
+    // You can show a small toast later
 
     this.showAddToCartDialog = false;
   }
 
   openAddToCart(book: any) {
     this.addToCartBook = book;
-    this.addToCartQuantity = 1;
+    this.quantity = 1;
     this.showAddToCartDialog = true;
   }
 
@@ -140,8 +147,6 @@ export class Shop {
     this.filteredBooks = [...this.books];
     this.showFilters = false;
   }
-
-  constructor(private bookService: BookService) {}
 
   ngOnInit() {
     this.bookService.getAllBooks().subscribe({

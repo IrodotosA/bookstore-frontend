@@ -11,8 +11,11 @@
   <div class="nav-right">
 
     <!-- CART ICON ALWAYS VISIBLE -->
-    <button class="icon-btn" routerLink="/cart">
+    <button class="icon-btn cart-wrapper" routerLink="/cart">
       <i class="pi pi-shopping-cart"></i>
+      <span class="cart-badge" *ngIf="cart.getTotalItems() > 0">
+        {{ cart.getTotalItems() }}
+      </span>
     </button>
 
     <!-- SHOW LOGIN WHEN NOT AUTHENTICATED -->
