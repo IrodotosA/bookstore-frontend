@@ -82,9 +82,46 @@
 
       <button 
         pButton 
-        class="w-full" 
-        label="Checkout">
+        label="Checkout" 
+        (click)="handleCheckout()"
+        class="w-full">
       </button>
+
+      <p-dialog 
+        [(visible)]="showLoginDialog"
+        [modal]="true"
+        [closable]="true"
+        header="Login Required"
+        [style]="{width: '350px'}">
+
+        <p>Please login or register before completing your order.</p>
+
+        <div class="mt-3 flex flex-column gap-2">
+
+            <button 
+              pButton 
+              label="Login"
+              class="p-button-primary w-full"
+              (click)="router.navigate(['/login'], { queryParams: { redirectTo: '/checkout' } })">
+            </button>
+
+            <button 
+              pButton 
+              label="Register"
+              class="p-button-secondary w-full"
+              (click)="router.navigate(['/register'], { queryParams: { redirectTo: '/checkout' } })">
+            </button>
+
+            <button 
+              pButton 
+              label="Cancel"
+              class="p-button-text w-full"
+              (click)="showLoginDialog = false">
+            </button>
+
+        </div>
+
+      </p-dialog>
     </div>
 
   </div>

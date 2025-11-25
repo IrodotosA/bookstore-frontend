@@ -1,0 +1,73 @@
+<div class="orders-page">
+
+  <!-- HERO -->
+  <div class="orders-hero">
+    <div class="orders-hero-content">
+      <h1>My Orders</h1>
+      <p>View all your past purchases</p>
+    </div>
+  </div>
+
+  <div class="orders-container">
+
+    <h2>Your Orders</h2>
+
+    <p *ngIf="loading">Loading orders...</p>
+    <p *ngIf="!loading && orders.length === 0">You have no orders yet.</p>
+
+    <p-accordion [value]="0" *ngIf="orders.length > 0">
+
+    <p-accordion-panel 
+        *ngFor="let order of orders; let i = index"
+        [value]="i">
+
+        <!-- HEADER -->
+        <p-accordion-header>
+            Order #{{ order._id }} — {{ order.createdAt | date:'medium' }}
+        </p-accordion-header>
+
+        <!-- BODY -->
+        <p-accordion-content>
+
+            <div class="order-summary">
+            <p><strong>Status:</strong>
+                <p-tag 
+                [severity]="getStatusSeverity(order.status)" 
+                [value]="order.status">
+                </p-tag>
+            </p>
+
+            <p><strong>Total:</strong>
+                €{{ order.totalPrice | number:'1.2-2' }}
+            </p>
+            </div>
+
+            <h4>Items:</h4>
+            <ul>
+            <li *ngFor="let item of order.items">
+                {{ item.title }} (x{{ item.quantity }})
+                — €{{ item.price * item.quantity | number:'1.2-2' }}
+            </li>
+            </ul>
+
+            <h4>Billing Info:</h4>
+            <p>{{ order.billing.name }}</p>
+            <p>{{ order.billing.address }}, {{ order.billing.city }}</p>
+            <p>{{ order.billing.postalCode }}, {{ order.billing.country }}</p>
+
+            <!-- CANCEL BUTTON (only if pending) -->
+            <div *ngIf="order.status === 'pending'" class="mt-3">
+            <button 
+                pButton 
+                label="Cancel Order" 
+                severity="danger"
+                (click)="cancel(order._id)">
+            </button>
+            </div>
+        </p-accordion-content>
+    </p-accordion-panel>
+
+    </p-accordion>
+
+  </div>
+</div>

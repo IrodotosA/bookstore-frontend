@@ -4,7 +4,12 @@ import { Login } from './auth/login/login';
 import { Register } from './auth/register/register';
 import { Shop } from './shop/shop';
 import { Cart } from './cart/cart';
-
+import { Checkout } from './checkout/checkout';
+import { OrderSuccess } from './order-success/order-success';
+import { MyOrders } from './my-orders/my-orders';
+import { AdminDashboard } from './admin/dashboard/dashboard';
+import { AuthGuard } from './auth/auth.guard';
+import { AdminGuard } from './guards/admin.guard';
 
 export const routes: Routes = [
   { path: '', component: Home },
@@ -12,5 +17,17 @@ export const routes: Routes = [
   { path: 'register', component: Register },
   { path: 'shop', component: Shop },
   { path: 'cart', component: Cart },
+  { path: 'checkout', component: Checkout, canActivate: [AuthGuard]  },
+  { path: 'order-success', component: OrderSuccess },
+  {
+    path: 'my-orders',
+    component: MyOrders,
+    canActivate: [AuthGuard]
+  },
+  { 
+    path: 'admin',
+    component: AdminDashboard,
+    canActivate: [AdminGuard]
+  },
   { path: '**', redirectTo: '' }
 ];

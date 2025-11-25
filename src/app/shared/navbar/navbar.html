@@ -25,9 +25,14 @@
     </div>
 
     <!-- SHOW LOGOUT WHEN AUTHENTICATED -->
-    <button (click)="logout()" *ngIf="auth.isLoggedIn()">
-      Logout
-    </button>
+     <div *ngIf="auth.isLoggedIn()">
+        <button routerLink="/my-orders" >
+          My Orders
+        </button>
+        <button (click)="logout()">
+          Logout
+        </button>
+     </div>
 
   </div>
 </nav>

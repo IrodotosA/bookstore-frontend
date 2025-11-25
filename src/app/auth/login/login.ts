@@ -9,7 +9,7 @@ import { MessageModule } from 'primeng/message';
 import { CardModule } from 'primeng/card';
 import { Router } from '@angular/router'; 
 import { RouterLink } from '@angular/router';
-
+import { ActivatedRoute } from '@angular/router';
 import { AuthService } from '../auth.service';
 
 @Component({
@@ -37,7 +37,8 @@ export class Login {
   constructor(
     private fb: FormBuilder, 
     private auth: AuthService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {
     // Validation
     this.loginForm = this.fb.group({
@@ -69,8 +70,9 @@ export class Login {
       next: (res) => {
         this.isLoading = false;
         this.auth.saveToken(res.token);
+        const redirectTo = this.route.snapshot.queryParams['redirectTo'] || '/';
         console.log('Login success', res);
-        this.router.navigate(['/']);
+        this.router.navigate([redirectTo]);
         // TODO: later we will navigate to /admin or /shop
       },
       error: (err) => {

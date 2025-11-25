@@ -1,0 +1,142 @@
+.checkout-page {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* HERO */
+.checkout-hero {
+  position: relative;
+  height: 35vh;
+  background-image: url('/assets/hero-banner-1.jpg');
+  background-size: cover;
+  background-position: center;
+}
+
+.checkout-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+}
+
+.checkout-hero-content {
+  position: relative;
+  z-index: 2;
+  color: white;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.checkout-hero-content h1 {
+  font-size: 3rem;
+}
+
+/* MAIN LAYOUT */
+.checkout-container {
+  max-width: 1300px;
+  margin: 2rem auto;
+  display: flex;
+  gap: 2rem;
+  padding: 0 1.5rem;
+}
+
+/* FORM LEFT SIDE */
+.checkout-form {
+  flex: 2;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.2rem;
+}
+
+.form-grid div {
+  display: flex;
+  flex-direction: column;
+}
+
+/* SUMMARY RIGHT SIDE */
+.checkout-summary {
+    flex: 1.5;              /* wider */
+    min-width: 320px;       /* minimum width */
+    max-width: 400px;       /* prevent it from getting too large */
+    position: sticky;
+    top: 90px;
+    padding: 1.5rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    height: fit-content;
+    }
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.7rem;
+}
+
+.summary-total {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1.4rem;
+  font-weight: bold;
+}
+
+/* MOBILE */
+@media (max-width: 900px) {
+  .checkout-container {
+    flex-direction: column;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.payment-methods {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-bottom: 1.5rem;
+}
+
+.method-option {
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.card-form {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fafafa;
+}
+
+.test-card-box {
+  margin-top: 1.5rem;
+  padding: 0.8rem 1rem;
+  background: #eef6ff;
+  border: 1px solid #bcdcff;
+  border-radius: 6px;
+}
+
+.test-card-box h4 {
+  margin-bottom: 0.5rem;
+}
+
+.test-card-box ul {
+  margin: 0;
+  padding-left: 1rem;
+}
+
+.card-error {
+  margin-top: 1rem;
+  color: #c60000;
+  font-weight: 600;
+}

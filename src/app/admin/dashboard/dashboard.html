@@ -1,0 +1,19 @@
+<div class="admin-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="admin-sidebar">
+    <h2>Admin Panel</h2>
+
+    <nav>
+      <a routerLink="/admin/books" routerLinkActive="active">Books</a>
+      <a routerLink="/admin/users" routerLinkActive="active">Users</a>
+      <a routerLink="/admin/orders" routerLinkActive="active">Orders</a>
+    </nav>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="admin-main">
+    <router-outlet></router-outlet>
+  </main>
+
+</div>

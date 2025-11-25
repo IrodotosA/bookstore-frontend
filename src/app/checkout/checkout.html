@@ -1,1 +1,189 @@
-<p>checkout works!</p>
+<div class="checkout-page">
+
+  <!-- HERO -->
+  <div class="checkout-hero">
+    <div class="checkout-hero-content">
+      <h1>Checkout</h1>
+    </div>
+  </div>
+
+    <div class="checkout-container">
+
+        <!-- LEFT: BILLING + SHIPPING FORM -->
+        <div class="checkout-form">
+
+            <h2>Billing Details</h2>
+
+            <div class="form-grid">
+
+                <div>
+                <label>Name</label>
+                <input pInputText [(ngModel)]="customer.name" name="name" required />
+                </div>
+
+                <div>
+                <label>Email</label>
+                <input pInputText [(ngModel)]="customer.email" name="email" required />
+                </div>
+
+                <div>
+                <label>Phone</label>
+                <input pInputText [(ngModel)]="customer.phone" name="phone" required />
+                </div>
+
+                <div>
+                <label>Address</label>
+                <input pInputText [(ngModel)]="customer.address" name="address" required />
+                </div>
+
+                <div>
+                <label>City</label>
+                <input pInputText [(ngModel)]="customer.city" name="city" required />
+                </div>
+
+                <div>
+                <label>Postal Code</label>
+                <input pInputText [(ngModel)]="customer.postalCode" name="postal" required />
+                </div>
+
+                <div>
+                <label>Country</label>
+                <input pInputText [(ngModel)]="customer.country" name="country" required />
+                </div>
+
+            </div>
+
+            <h2>Payment Method</h2>
+
+            <div class="payment-methods">
+
+            <!-- Radio Buttons -->
+            <label class="method-option">
+                <input 
+                type="radio" 
+                name="payment" 
+                value="card" 
+                [(ngModel)]="paymentMethod"
+                />
+                Credit / Debit Card
+            </label>
+
+            <label class="method-option">
+                <input 
+                type="radio" 
+                name="payment" 
+                value="cod" 
+                [(ngModel)]="paymentMethod"
+                />
+                Cash on Delivery
+            </label>
+
+            <label class="method-option">
+                <input 
+                type="radio" 
+                name="payment" 
+                value="paypal" 
+                [(ngModel)]="paymentMethod"
+                />
+                PayPal (Coming Soon)
+            </label>
+            </div>
+
+            <div *ngIf="paymentMethod === 'card'" class="card-form">
+
+            <h3>Card Details</h3>
+
+            <div class="form-grid">
+
+                <div>
+                    <label>Card Number</label>
+                    <input 
+                    pInputText 
+                    [(ngModel)]="card.number" 
+                    name="cardNumber" 
+                    required 
+                    placeholder="4111 1111 1111 1111" />
+                </div>
+
+                <div>
+                    <label>Name on Card</label>
+                    <input 
+                    pInputText 
+                    [(ngModel)]="card.name" 
+                    name="cardName" 
+                    required 
+                    placeholder="John Doe" />
+                </div>
+
+                <div>
+                    <label>Expiration</label>
+                    <input 
+                    pInputText 
+                    [(ngModel)]="card.exp" 
+                    name="cardExp" 
+                    required 
+                    placeholder="12/28" />
+                </div>
+
+                <div>
+                    <label>CVV</label>
+                    <input 
+                    pInputText 
+                    [(ngModel)]="card.cvv" 
+                    name="cardCvv" 
+                    required 
+                    placeholder="123" />
+                </div>
+
+            </div>
+
+            <!-- Validation Error -->
+            <p class="card-error" *ngIf="paymentMethod === 'card' && !isCardValid()">
+                Please enter valid test card details.
+            </p>
+
+            <!-- Dummy Cards Box -->
+            <div class="test-card-box">
+                <h4>Test Cards</h4>
+                <p>Use any of the cards below for testing:</p>
+
+                <ul>
+                <li *ngFor="let t of testCards">
+                    <strong>{{ t.type }}:</strong> {{ t.number }} — Exp: {{ t.exp }} — CVV: {{ t.cvv }}
+                </li>
+                </ul>
+            </div>
+
+            </div>
+
+        </div>
+
+        <!-- RIGHT: ORDER SUMMARY -->
+        <div class="checkout-summary">
+        <h2>Your Order</h2>
+
+        <div class="summary-list">
+            <div class="summary-item" *ngFor="let item of items">
+            <span>{{ item.title }} (x{{ item.quantity }})</span>
+            <span>€{{ item.price * item.quantity | number:'1.2-2' }}</span>
+            </div>
+        </div>
+
+        <hr />
+
+        <div class="summary-total">
+            <span>Total:</span>
+            <span>€{{ total | number:'1.2-2' }}</span>
+        </div>
+
+            <button 
+                pButton 
+                class="w-full mt-3" 
+                label="Place Order" 
+                (click)="placeOrder()"
+                [disabled]="!isFormValid() || !isCardValid()">
+            </button>
+        </div>
+
+    </div>
+</div>
