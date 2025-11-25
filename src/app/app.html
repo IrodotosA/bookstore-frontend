@@ -17,5 +17,5 @@
 <!-- * * * * * * * * * * End of Placeholder  * * * * * * * * * * * * -->
 <!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
 
-<app-navbar></app-navbar>
+<app-navbar *ngIf="!isAdminRoute()"></app-navbar>
 <router-outlet />

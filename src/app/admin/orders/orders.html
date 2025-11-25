@@ -1,0 +1,220 @@
+<div class="admin-orders">
+  <h1>Orders</h1>
+
+  <p-table
+    [value]="orders"
+    dataKey="_id"
+    [loading]="loading"
+    [paginator]="true"
+    [rows]="10"
+    [rowsPerPageOptions]="[5, 10, 25, 50]"
+    [expandedRowKeys]="expandedRows"
+    (onRowExpand)="onRowExpand($event)"
+    (onRowCollapse)="onRowCollapse($event)"
+  >
+    <!-- CAPTION: Expand / Collapse all -->
+    <ng-template #caption>
+      <div class="flex flex-wrap justify-end gap-2">
+        <p-button label="Expand All" icon="pi pi-plus" text (onClick)="expandAll()" />
+        <p-button label="Collapse All" icon="pi pi-minus" text (onClick)="collapseAll()" />
+      </div>
+    </ng-template>
+
+    <!-- HEADER -->
+    <ng-template #header>
+      <tr>
+        <th style="width: 5rem"></th>
+        <th>ID</th>
+        <th>User</th>
+        <th>Total (€)</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </ng-template>
+
+    <!-- BODY ROW -->
+    <ng-template #body let-order let-expanded="expanded">
+      <tr>
+        <td>
+          <p-button
+            type="button"
+            [pRowToggler]="order"
+            [text]="true"
+            severity="secondary"
+            [rounded]="true"
+            [icon]="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"
+          />
+        </td>
+
+        <td>{{ order._id }}</td>
+        <td>{{ order.billing?.email }}</td>
+        <td>{{ order.totalPrice | number: '1.2-2' }}</td>
+
+        <td>
+            <p-tag 
+                [value]="order.status | titlecase"
+                [severity]="getStatusSeverity(order.status)"
+            ></p-tag>
+        </td>
+
+        <td>
+            <p-button 
+                icon="pi pi-pencil" 
+                text 
+                (onClick)="openEdit(order)"
+            ></p-button>
+            <p-button
+                icon="pi pi-trash"
+                severity="danger"
+                text
+                (onClick)="deleteOrder(order)"
+            />
+        </td>
+      </tr>
+    </ng-template>
+
+    <!-- EXPANDED ROW (MUST be #expandedrow, EXACTLY like docs) -->
+    <ng-template #expandedrow let-order>
+      <tr>
+        <td colspan="6">
+          <div class="expanded-box">
+
+            <h4>Items</h4>
+            <ul>
+              <li *ngFor="let item of order.items">
+                {{ item.title }} (x{{ item.quantity }})
+              </li>
+            </ul>
+
+            <h4>Billing</h4>
+            <div class="billing-grid">
+              <p><strong>Name:</strong> {{ order.billing?.name }}</p>
+              <p><strong>Email:</strong> {{ order.billing?.email }}</p>
+              <p><strong>Phone:</strong> {{ order.billing?.phone }}</p>
+              <p><strong>Address:</strong> {{ order.billing?.address }}</p>
+              <p><strong>City:</strong> {{ order.billing?.city }}</p>
+              <p><strong>Country:</strong> {{ order.billing?.country }}</p>
+            </div>
+
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+
+    <p-dialog
+    [(visible)]="orderDialog"
+    [modal]="true"
+    [style]="{ width: '90vw', maxWidth: '850px' }"
+    header="Edit Order"
+    >
+
+    <div class="form-grid">
+
+        <!-- BILLING SECTION -->
+        <h3>Billing Information</h3>
+
+        <div class="form-grid">
+            <div class="field">
+                <label>Name</label>
+                <input pInputText [(ngModel)]="form.billing.name" />
+            </div>
+
+            <div class="field">
+                <label>Email</label>
+                <input pInputText [(ngModel)]="form.billing.email" />
+            </div>
+
+            <div class="field">
+                <label>Phone</label>
+                <input pInputText [(ngModel)]="form.billing.phone" />
+            </div>
+
+            <div class="field">
+                <label>Address</label>
+                <input pInputText [(ngModel)]="form.billing.address" />
+            </div>
+
+            <div class="field">
+                <label>City</label>
+                <input pInputText [(ngModel)]="form.billing.city" />
+            </div>
+
+            <div class="field">
+                <label>Postal Code</label>
+                <input pInputText [(ngModel)]="form.billing.postalCode" />
+            </div>
+
+            <div class="field">
+                <label>Country</label>
+                <input pInputText [(ngModel)]="form.billing.country" />
+            </div>
+        </div>
+
+
+        <!-- ORDER ITEMS -->
+        <h3>Order Items</h3>
+
+        <table class="items-table">
+        <thead>
+            <tr>
+            <th>Title</th>
+            <th>Qty</th>
+            <th>Price</th>
+            <th>Subtotal</th>
+            <th></th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <tr *ngFor="let item of form.items; let i = index">
+            <td>
+                <input pInputText [(ngModel)]="item.title" (ngModelChange)="calculateTotal()" />
+            </td>
+            <td>
+                <p-inputNumber [(ngModel)]="item.quantity" [min]="1" (onInput)="calculateTotal()"></p-inputNumber>
+            </td>
+            <td>
+                <p-inputNumber [(ngModel)]="item.price" mode="decimal" [minFractionDigits]="2" (onInput)="calculateTotal()"></p-inputNumber>
+            </td>
+            <td>{{ item.price * item.quantity | number:'1.2-2' }}</td>
+            <td>
+                <button pButton icon="pi pi-trash" class="p-button-danger p-button-text" (click)="removeItem(i)"></button>
+            </td>
+            </tr>
+        </tbody>
+        </table>
+
+        <!-- <button pButton label="Add Item" icon="pi pi-plus" class="p-button-text" (click)="addItem()"></button> -->
+
+        <!-- STATUS -->
+        <h3>Status</h3>
+        <p-select
+        [options]="statuses"
+        optionLabel="label"
+        optionValue="value"
+        [(ngModel)]="form.status"
+        ></p-select>
+
+        <!-- PAYMENT -->
+        <h3>Payment Method</h3>
+        <p-select
+        [options]="paymentMethods"
+        optionLabel="label"
+        optionValue="value"
+        [(ngModel)]="form.paymentMethod"
+        ></p-select>
+
+        <!-- TOTAL -->
+        <h3>Total Price</h3>
+        <p-inputNumber [(ngModel)]="form.totalPrice" mode="decimal" [minFractionDigits]="2"></p-inputNumber>
+
+    </div>
+
+    <ng-template pTemplate="footer">
+        <button pButton label="Cancel" class="p-button-text" (click)="hideDialog()"></button>
+        <button pButton label="Save" (click)="saveOrder()"></button>
+    </ng-template>
+
+    </p-dialog>
+</div>

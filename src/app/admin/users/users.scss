@@ -1,0 +1,17 @@
+.admin-users {
+  .form-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    .field {
+      display: flex;
+      flex-direction: column;
+
+      label {
+        font-weight: 600;
+        margin-bottom: 0.3rem;
+      }
+    }
+  }
+}

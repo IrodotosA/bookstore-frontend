@@ -1,47 +1,76 @@
 .admin-layout {
-  display: flex;
-  min-height: 100vh;
-}
-
-/* Sidebar */
-.admin-sidebar {
-  width: 250px;
-  background: #25180e;
-  color: white;
-  padding: 2rem 1rem;
-  position: fixed;
-  top: 0;
-  left: 0;
-  bottom: 0;
-
-  h2 {
-    font-size: 1.4rem;
-    margin-bottom: 2rem;
-    text-align: center;
-  }
-
-  nav {
     display: flex;
     flex-direction: column;
+    height: 100%;
+
+}
+
+.admin-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 999;   
+    display: flex;
+    align-items: center;
     gap: 1rem;
+    padding: 1rem 2rem;
+    background: #25180e;
+    color: white;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+
+    h1 {
+        margin: 0;
+        font-size: 1.3rem;
+    }
+}
+
+.drawer-menu {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0;
+  flex-grow: 1; /* pushes logout to bottom */
+
+  li {
+    margin-bottom: 1rem;
 
     a {
-      color: white;
+      display: block;
+      color: #333;
       text-decoration: none;
-      padding: .6rem 1rem;
-      border-radius: 4px;
+      font-size: 1.1rem;
+      padding: 0.3rem 0;
 
-      &:hover, &.active {
-        background-color: #d2b291;
-        color: #25180e;
+      &.active {
+        color: #8b5e3c;
+        font-weight: bold;
       }
     }
   }
 }
 
-/* Main content */
-.admin-main {
-  margin-left: 250px;
+.drawer-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.drawer-logout {
+  padding: 1rem 0;
+  border-top: 1px solid #ddd;
+}
+
+.logout-btn {
+  width: 100%;
+  background: #c0392b !important;   /* deep red */
+  border: none !important;
+  color: #fff !important;
+  padding: 0.8rem 0;
+  font-size: 1rem;
+
+  &:hover {
+    background: #a5281e !important;
+  }
+}
+
+.admin-content {
   padding: 2rem;
-  width: calc(100% - 250px);
 }

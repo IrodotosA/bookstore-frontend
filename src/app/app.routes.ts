@@ -8,6 +8,9 @@ import { Checkout } from './checkout/checkout';
 import { OrderSuccess } from './order-success/order-success';
 import { MyOrders } from './my-orders/my-orders';
 import { AdminDashboard } from './admin/dashboard/dashboard';
+import { AdminBooks } from './admin/books/books';
+import { AdminUsers } from './admin/users/users';
+import { AdminOrders } from './admin/orders/orders';
 import { AuthGuard } from './auth/auth.guard';
 import { AdminGuard } from './guards/admin.guard';
 
@@ -27,7 +30,13 @@ export const routes: Routes = [
   { 
     path: 'admin',
     component: AdminDashboard,
-    canActivate: [AdminGuard]
+    canActivate: [AdminGuard],
+    children: [
+      { path: '', redirectTo: 'books', pathMatch: 'full' },
+      { path: 'books', component: AdminBooks },
+      { path: 'users', component: AdminUsers },
+      { path: 'orders', component: AdminOrders }
+    ]
   },
   { path: '**', redirectTo: '' }
 ];

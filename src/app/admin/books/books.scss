@@ -1,0 +1,32 @@
+.admin-books {
+  h1 {
+    margin-bottom: 1.5rem;
+  }
+
+  .toolbar {
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .form-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    .field {
+      display: flex;
+      flex-direction: column;
+
+      label {
+        font-weight: 600;
+        margin-bottom: 0.3rem;
+      }
+    }
+  }
+}

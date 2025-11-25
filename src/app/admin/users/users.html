@@ -1,0 +1,69 @@
+<div class="admin-users">
+
+  <h1>Users</h1>
+
+  <p-table [value]="users" [loading]="loading" [rows]="10" [paginator]="true" [rowsPerPageOptions]="[5, 10, 25, 50]">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Role</th>
+        <th>Actions</th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-user>
+      <tr>
+        <td>{{ user.name }}</td>
+        <td>{{ user.email }}</td>
+        <td>{{ user.role }}</td>
+        <td class="actions">
+          <button pButton icon="pi pi-pencil" class="p-button-text" (click)="editUser(user)"></button>
+          <button pButton icon="pi pi-trash" class="p-button-text p-button-danger" (click)="deleteUser(user)"></button>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+
+  <!-- Edit Dialog -->
+  <p-dialog
+  [(visible)]="userDialog"
+  [modal]="true"
+  [style]="{ width: '90vw', maxWidth: '450px' }"
+  [closable]="false"
+  [dismissableMask]="true"
+  header="Edit User"
+>
+
+  <div class="form-grid">
+
+    <div class="field">
+      <label>Name</label>
+      <input pInputText [(ngModel)]="form.name" />
+    </div>
+
+    <div class="field">
+      <label>Email</label>
+      <input pInputText [(ngModel)]="form.email" />
+    </div>
+
+    <div class="field">
+      <label>Role</label>
+      <p-select
+        [options]="roles"
+        optionLabel="label"
+        optionValue="value"
+        [(ngModel)]="form.role"
+      ></p-select>
+    </div>
+
+  </div>
+
+  <ng-template pTemplate="footer">
+    <button pButton label="Cancel" class="p-button-text" (click)="userDialog = false"></button>
+    <button pButton label="Save" (click)="saveUser()"></button>
+  </ng-template>
+
+</p-dialog>
+
+</div>

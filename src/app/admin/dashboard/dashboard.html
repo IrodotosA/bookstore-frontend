@@ -1,18 +1,45 @@
 <div class="admin-layout">
 
-  <!-- SIDEBAR -->
-  <aside class="admin-sidebar">
-    <h2>Admin Panel</h2>
+  <!-- TOP BAR WITH MENU BUTTON -->
+  <div class="admin-topbar">
+    <button pButton icon="pi pi-bars" (click)="toggleDrawer()"></button>
+    <h1>Admin Dashboard</h1>
+  </div>
 
-    <nav>
-      <a routerLink="/admin/books" routerLinkActive="active">Books</a>
-      <a routerLink="/admin/users" routerLinkActive="active">Users</a>
-      <a routerLink="/admin/orders" routerLinkActive="active">Orders</a>
-    </nav>
-  </aside>
+  <!-- DRAWER -->
+  <p-drawer 
+    [(visible)]="drawerVisible"
+    position="left"
+    header="Admin Menu"
+    [modal]="true"
+    [closeOnEscape]="true"
+    >
+        <div class="drawer-container">
+
+            <!-- MENU ITEMS -->
+            <ul class="drawer-menu">
+            <li><a routerLink="/"><i class="pi pi-home"></i> Home</a></li>
+            <li><a routerLink="/shop"><i class="pi pi-book"></i> Shop</a></li>
+            <li><a routerLink="/cart"><i class="pi pi-shopping-cart"></i> Cart</a></li>
+
+            <hr />
+
+            <li><a routerLink="/admin/dashboard" routerLinkActive="active"><i class="pi pi-chart-bar"></i> Dashboard</a></li>
+            <li><a routerLink="/admin/books" routerLinkActive="active"><i class="pi pi-book"></i> Books</a></li>
+            <li><a routerLink="/admin/users" routerLinkActive="active"><i class="pi pi-users"></i> Users</a></li>
+            <li><a routerLink="/admin/orders" routerLinkActive="active"><i class="pi pi-box"></i> Orders</a></li>
+            </ul>
+
+            <!-- LOGOUT BUTTON FIXED AT BOTTOM -->
+            <div class="drawer-logout">
+                <button pButton class="logout-btn" (click)="logout()">Logout</button>
+            </div>
+
+        </div>
+  </p-drawer>
 
   <!-- MAIN CONTENT -->
-  <main class="admin-main">
+  <main class="admin-content">
     <router-outlet></router-outlet>
   </main>
 

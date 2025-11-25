@@ -1,0 +1,36 @@
+.expanded-box {
+  padding: 1rem 2rem;
+  background: #fafafa;
+  border-left: 3px solid #8b5e3c;
+  margin-bottom: 1rem;
+}
+
+.billing-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: .5rem 2rem;
+  margin-bottom: .5rem;
+}
+
+h4 {
+  margin: 1rem 0 .5rem;
+  color: #8b5e3c;
+}
+
+.form-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+}
+
+.field label {
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: #555;
+}

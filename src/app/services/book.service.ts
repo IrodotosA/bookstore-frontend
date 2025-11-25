@@ -19,4 +19,37 @@ export class BookService {
   getBookById(id: string) {
     return this.http.get<any>(`${this.apiUrl}/${id}`);
   }
+
+    // 🔹 Create book (admin)
+  createBook(bookData: any): Observable<any> {
+    const token = localStorage.getItem('token');
+
+    return this.http.post(this.apiUrl, bookData, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+  }
+
+  // 🔹 Update book (admin)
+  updateBook(id: string, bookData: any): Observable<any> {
+    const token = localStorage.getItem('token');
+
+    return this.http.put(`${this.apiUrl}/${id}`, bookData, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+  }
+
+  // 🔹 Delete book (admin)
+  deleteBook(id: string): Observable<any> {
+    const token = localStorage.getItem('token');
+
+    return this.http.delete(`${this.apiUrl}/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+  }
 }

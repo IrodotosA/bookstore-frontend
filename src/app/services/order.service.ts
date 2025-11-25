@@ -41,4 +41,29 @@ export class OrderService {
       }
     );
   }
+
+  getAllOrders() {
+    const token = localStorage.getItem('token');
+    return this.http.get<any[]>('http://localhost:4000/orders', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  }
+
+  updateOrderStatus(id: string, status: string) {
+    const token = localStorage.getItem('token');
+    return this.http.put(`http://localhost:4000/orders/${id}`, { status }, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  }
+
+  updateOrderFull(id: string, payload: any) {
+    return this.http.put<any>(`${this.apiUrl}/${id}`, payload);
+  }
+
+  deleteOrder(id: string) {
+    const token = localStorage.getItem('token');
+    return this.http.delete(`http://localhost:4000/orders/${id}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  }
 }
