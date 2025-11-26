@@ -11,6 +11,7 @@ import { AdminDashboard } from './admin/dashboard/dashboard';
 import { AdminBooks } from './admin/books/books';
 import { AdminUsers } from './admin/users/users';
 import { AdminOrders } from './admin/orders/orders';
+import { HomeAdmin } from './admin/home/home';
 import { AuthGuard } from './auth/auth.guard';
 import { AdminGuard } from './guards/admin.guard';
 
@@ -32,7 +33,8 @@ export const routes: Routes = [
     component: AdminDashboard,
     canActivate: [AdminGuard],
     children: [
-      { path: '', redirectTo: 'books', pathMatch: 'full' },
+      { path: '', redirectTo: 'home', pathMatch: 'full' },
+      { path: 'home', component: HomeAdmin },
       { path: 'books', component: AdminBooks },
       { path: 'users', component: AdminUsers },
       { path: 'orders', component: AdminOrders }
