@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 interface LoginResponse {
   token: string;
@@ -13,7 +14,7 @@ interface LoginResponse {
 })
 export class AuthService {
   // adjust if your backend port/path is different
-  private apiUrl = 'http://localhost:4000';
+  private apiUrl = environment.apiUrl;
 
   private authState = new BehaviorSubject<boolean>(this.isLoggedIn());
   authState$ = this.authState.asObservable();

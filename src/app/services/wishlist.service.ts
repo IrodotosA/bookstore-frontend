@@ -3,12 +3,13 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject, of } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { AuthService } from '../auth/auth.service';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class WishlistService {
-  private apiUrl = 'http://localhost:4000/wishlist';
+  private apiUrl = `${environment.apiUrl}/wishlist`;
 
   private _wishlist$ = new BehaviorSubject<string[]>([]);
   public wishlist$ = this._wishlist$.asObservable();
