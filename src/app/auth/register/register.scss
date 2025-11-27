@@ -53,19 +53,13 @@ button {
   }
 }
 
-.p-password {
-  position: relative;
-  display: inline-flex;
+/* Make the password wrapper full width, like in login */
+:host ::ng-deep .password-wrapper {
   width: 100%;
 }
 
-.p-password-input {
-  width: 100%;
-}
-
-.p-password .p-password-toggle-icon {
-  position: absolute;
-  right: 1rem;
-  top: 50%;
-  transform: translateY(-50%);
+/* Make the actual input full width, like in login */
+:host ::ng-deep .p-password-input,
+:host ::ng-deep .password-input {
+  width: 100% !important;
 }
