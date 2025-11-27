@@ -138,3 +138,34 @@
   display: flex !important;
   justify-content: center !important;
 }
+
+.empty-cart {
+  text-align: center;
+  margin: 3rem 0;
+  padding: 2rem;
+}
+
+.empty-cart h2 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  color: #25180e;
+}
+
+.empty-cart p {
+  margin-bottom: 1.5rem;
+  color: #555;
+  font-size: 1.1rem;
+}
+
+.empty-btn {
+  background-color: #25180e !important;
+  color: #fff !important;
+  border: none !important;
+  padding: 0.7rem 1.8rem !important;
+  border-radius: 6px !important;
+  font-weight: 600 !important;
+
+  &:hover {
+    background-color: #3a220f !important;
+  }
+}

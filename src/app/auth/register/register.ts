@@ -15,13 +15,15 @@ import { ButtonModule } from 'primeng/button';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { MessageModule } from 'primeng/message';
 import { CardModule } from 'primeng/card';
-
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 import { Router } from '@angular/router';
 import { AuthService } from '../auth.service';
 
 @Component({
   selector: 'app-register',
   standalone: true,
+  providers: [MessageService],
   imports: [
     CommonModule,
     ReactiveFormsModule,
@@ -32,6 +34,7 @@ import { AuthService } from '../auth.service';
     MessageModule,
     CardModule,
     RouterLink,
+    ToastModule
   ],
   templateUrl: './register.html',
   styleUrl: './register.scss',
@@ -44,7 +47,8 @@ export class Register {
   constructor(
     private fb: FormBuilder,
     private auth: AuthService,
-    private router: Router
+    private router: Router,
+    private messageService: MessageService
   ) {
     // ✅ Build form inside constructor (fixes fb-before-init)
     this.registerForm = new FormGroup(
@@ -101,8 +105,17 @@ export class Register {
     this.auth.register({ name: name!, email: email!, password: password! }).subscribe({
       next: (res) => {
         this.isLoading = false;
-        this.auth.saveToken(res.token);
-        this.router.navigate(['/home']);
+                // success toast
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Registration complete! Please log in.'
+        });
+
+        // redirect after short delay
+        setTimeout(() => {
+          this.router.navigate(['/login']);
+        }, 1500);
       },
       error: (err) => {
         this.isLoading = false;

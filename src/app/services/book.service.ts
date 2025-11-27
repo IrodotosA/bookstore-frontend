@@ -42,6 +42,18 @@ export class BookService {
     });
   }
 
+  getFeaturedBooks() {
+    return this.http.get<any[]>(`${this.apiUrl}/featured`);
+  }
+  
+  updateFeatured(id: string, featured: boolean) {
+    return this.http.patch<any>(`${this.apiUrl}/${id}/featured`, { featured });
+  }
+
+  getNewestBooks() {
+    return this.http.get<any[]>(`${this.apiUrl}/newest`);
+  }
+
   // 🔹 Delete book (admin)
   deleteBook(id: string): Observable<any> {
     const token = localStorage.getItem('token');

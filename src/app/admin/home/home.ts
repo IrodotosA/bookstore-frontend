@@ -32,7 +32,17 @@ export class HomeAdmin implements OnInit {
   chartData: any;
   chartOptions = {
     responsive: true,
-    maintainAspectRatio: false
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'top'
+      }
+    },
+    scales: {
+      x: {
+        ticks: { maxRotation: 90, minRotation: 45 }
+      }
+    }
   };
 
   constructor(private http: HttpClient) {}

@@ -7,8 +7,22 @@
 
 <div class="cart-page">
 
+  <!-- EMPTY CART MESSAGE -->
+  <div *ngIf="items.length === 0" class="empty-cart">
+    <h2>Your cart is empty</h2>
+    <p>It seems you haven't added anything yet. Start exploring books!</p>
+
+    <button
+      pButton
+      label="Browse Books"
+      icon="pi pi-arrow-right"
+      class="shop-more-btn empty-btn"
+      routerLink="/shop"
+    ></button>
+  </div>
+
   <!-- MAIN CONTAINER (TABLE + SUMMARY PANEL) -->
-  <div class="cart-layout">
+  <div *ngIf="items.length > 0" class="cart-layout">
 
     <!-- CART TABLE (scrollable on mobile) -->
     <div class="cart-table-wrapper">

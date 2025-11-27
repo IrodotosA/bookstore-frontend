@@ -1,0 +1,29 @@
+.footer {
+  background: #f5f5f5;
+  padding: 1.5rem 0;
+  font-size: 0.95rem;
+  color: #555;
+  margin-top: 0;
+
+  .footer-content {
+    max-width: 900px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  nav {
+    margin-top: 0.5rem;
+
+    a {
+      margin: 0 0.75rem;
+      color: #333;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s ease;
+
+      &:hover {
+        color: #000;
+      }
+    }
+  }
+}

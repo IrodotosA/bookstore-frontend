@@ -93,7 +93,19 @@
 
     <!-- Book Cards -->
     <div class="col-12 md:col-6 lg:col-4" *ngFor="let book of filteredBooks">
+      <div class="card-wrapper">
       <p-card styleClass="h-full">
+
+        <div class="wishlist-heart" (click)="toggleWishlist(book); $event.stopPropagation()">
+          <i 
+            class="pi" 
+            [ngClass]="isInWishlist(book._id) ? 'pi-heart-fill filled' : 'pi-heart'"
+          ></i>
+        </div>
+
+        <div class="featured-badge" *ngIf="book.featured">
+          <i class="pi pi-star-fill"></i>
+        </div>
 
         <img
           [src]="'http://localhost:4000' + book.imageUrl"
@@ -137,6 +149,7 @@
         </ng-template>
 
       </p-card>
+      </div>
     </div>
   </div>
 
@@ -189,7 +202,7 @@
             pButton 
             label="Add"
             icon="pi pi-check"
-            (click)="confirmAddToCart()">
+            (click)="confirmAddToCart($event)">
           </button>
 
         </div>
@@ -218,6 +231,16 @@
         class="w-full mb-3 border-round">
 
       <h2>{{ selectedBook.title }}</h2>
+
+      <div class="wishlist-heart"
+          *ngIf="selectedBook"
+          (click)="toggleWishlist(selectedBook)">
+        <i 
+          class="pi"
+          [ngClass]="isInWishlist(selectedBook._id) ? 'pi-heart-fill filled' : 'pi-heart'"
+        ></i>
+      </div>
+
       <p><strong>Author:</strong> {{ selectedBook.author }}</p>
       <p><strong>Category:</strong> {{ selectedBook.category }}</p>
       <p><strong>Price:</strong> €{{ selectedBook.price }}</p>
@@ -249,12 +272,13 @@
         </button>
       </div>
 
-      <button 
+        <button 
         pButton 
         label="Add to Cart"
         icon="pi pi-shopping-cart"
-        class="mt-4 w-full">
-      </button>
+        class="mt-4 w-full"
+        (click)="confirmAddToCart($event)">
+        </button>
 
     </div>
 

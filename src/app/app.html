@@ -18,4 +18,7 @@
 <!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
 
 <app-navbar *ngIf="!isAdminRoute()"></app-navbar>
-<router-outlet />
+<div class="main-content">
+    <router-outlet />
+</div>
+<app-footer></app-footer>

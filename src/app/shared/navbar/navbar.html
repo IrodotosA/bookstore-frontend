@@ -1,23 +1,13 @@
 <nav class="navbar" [class.scrolled]="isScrolled" [class.forceSolid]="forceSolid">
+
+  <!-- LEFT: LOGO -->
   <div class="nav-left">
     <a routerLink="/" class="logo">BookStore</a>
   </div>
 
-  <div class="nav-links">
-    <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Home</a>
-    <a routerLink="/shop" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Shop</a>
-    <a 
-      routerLink="/admin" 
-      *ngIf="auth.isLoggedIn() && auth.isAdmin()"
-      routerLinkActive="active"
-      [routerLinkActiveOptions]="{ exact: true }">
-      Admin
-    </a>
-  </div>
-
   <div class="nav-right">
 
-    <!-- CART ICON ALWAYS VISIBLE -->
+    <!-- CART ICON -->
     <button class="icon-btn cart-wrapper" routerLink="/cart">
       <i class="pi pi-shopping-cart"></i>
       <span class="cart-badge" *ngIf="cart.getTotalItems() > 0">
@@ -25,21 +15,10 @@
       </span>
     </button>
 
-    <!-- SHOW LOGIN WHEN NOT AUTHENTICATED -->
-    <div *ngIf="!auth.isLoggedIn()">
-        <button routerLink="/login">Login</button>
-        <button routerLink="/register">Register</button>
-    </div>
-
-    <!-- SHOW LOGOUT WHEN AUTHENTICATED -->
-     <div *ngIf="auth.isLoggedIn()">
-        <button routerLink="/my-orders" >
-          My Orders
-        </button>
-        <button (click)="logout()">
-          Logout
-        </button>
-     </div>
+    <!-- POPUP MENU -->
+    <p-menu #menu [model]="items" [popup]="true" appendTo="body"></p-menu>
+    <p-button icon="pi pi-ellipsis-v" (click)="menu.toggle($event)" styleClass="menu-btn" text></p-button>
 
   </div>
+
 </nav>

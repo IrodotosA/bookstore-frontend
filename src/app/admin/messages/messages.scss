@@ -1,0 +1,28 @@
+.admin-messages {
+  h1 {
+    margin-bottom: 1.5rem;
+  }
+
+  .toolbar {
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    input {
+      max-width: 260px;
+    }
+  }
+}
+
+.expanded-box {
+  padding: 1rem 2rem;
+  background: #fafafa;
+  border-left: 3px solid #8b5e3c;
+  margin-bottom: 1rem;
+
+  h4 {
+    margin: 0 0 .5rem;
+    color: #8b5e3c;
+  }
+}

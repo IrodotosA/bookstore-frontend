@@ -3,6 +3,14 @@
   <h1>Books</h1>
 
   <div class="toolbar">
+    <input 
+      pInputText
+      placeholder="Search by title, author or category..."
+      [(ngModel)]="searchTerm"
+      (input)="filterBooks()"
+      style="width: 260px; margin-right: 1rem;"
+    />
+
     <button 
       pButton 
       label="Add Book" 
@@ -12,40 +20,94 @@
   </div>
 
   <p-table 
-    [value]="books" 
+    [value]="filteredBooks" 
+    dataKey="_id"
     [loading]="loading"
     [paginator]="true"
     [rows]="10"
     [rowsPerPageOptions]="[5, 10, 25, 50]"
-    >
+    [expandedRowKeys]="expandedRows"
+    (onRowExpand)="onRowExpand($event)"
+    (onRowCollapse)="onRowCollapse($event)"
+  >
 
+    <!-- CAPTION (toolbar for expand/collapse all) -->
+    <ng-template #caption>
+      <div class="flex justify-end gap-2">
+        <p-button label="Expand All" icon="pi pi-plus" text (onClick)="expandAll()" />
+        <p-button label="Collapse All" icon="pi pi-minus" text (onClick)="collapseAll()" />
+      </div>
+    </ng-template>
+
+    <!-- HEADER -->
     <ng-template pTemplate="header">
       <tr>
+        <th style="width: 5rem"></th>
+
         <th>Image</th>
-        <th>Title</th>
-        <th>Author</th>
-        <th>Category</th>
-        <th>Price (€)</th>
+
+        <th pSortableColumn="title">
+          Title <p-sortIcon field="title"></p-sortIcon>
+        </th>
+
+        <th pSortableColumn="author">
+          Author <p-sortIcon field="author"></p-sortIcon>
+        </th>
+
+        <th pSortableColumn="category">
+          Category <p-sortIcon field="category"></p-sortIcon>
+        </th>
+
+        <th pSortableColumn="price">
+          Price (€) <p-sortIcon field="price"></p-sortIcon>
+        </th>
+
+        <th pSortableColumn="price">
+          Featured
+        </th>
+
         <th>Actions</th>
       </tr>
     </ng-template>
 
-    <ng-template pTemplate="body" let-book>
+    <!-- BODY -->
+    <ng-template #body let-book let-expanded="expanded">
       <tr>
         <td>
-            <img 
+          <p-button 
+            type="button"
+            [pRowToggler]="book"
+            [text]="true"
+            severity="secondary"
+            [rounded]="true"
+            [icon]="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"
+          ></p-button>
+        </td>
+
+        <td>
+          <img 
             [src]="'http://localhost:4000' + book.imageUrl" 
             alt="Book image" 
-            width="60" 
-            height="80"
+            width="60" height="80"
             style="object-fit: cover; border-radius: 4px;"
-            />
+          />
         </td>
 
         <td>{{ book.title }}</td>
         <td>{{ book.author }}</td>
         <td>{{ book.category }}</td>
         <td>{{ book.price | number:'1.2-2' }}</td>
+        <td>
+          <p-toggleButton 
+            [onIcon]="'pi pi-check'" 
+            [offIcon]="'pi pi-times'"
+            onLabel="Yes"
+            offLabel="No"
+            [ngModel]="book.featured"
+            (onChange)="toggleFeatured(book)"
+          ></p-toggleButton>
+        </td>
+
         <td>
           <button 
             pButton 
@@ -59,6 +121,28 @@
             class="p-button-text p-button-danger"
             (click)="deleteBook(book)">
           </button>
+        </td>
+      </tr>
+    </ng-template>
+
+    <!-- EXPANDED ROW -->
+    <ng-template #expandedrow let-book>
+      <tr>
+        <td colspan="7">
+          <div class="expanded-box">
+
+            <h4>Description</h4>
+            <p>{{ book.description }}</p>
+
+            <h4>Book Details</h4>
+            <div class="details-grid">
+              <p><strong>Title:</strong> {{ book.title }}</p>
+              <p><strong>Author:</strong> {{ book.author }}</p>
+              <p><strong>Category:</strong> {{ book.category }}</p>
+              <p><strong>Price:</strong> €{{ book.price | number:'1.2-2' }}</p>
+            </div>
+
+          </div>
         </td>
       </tr>
     </ng-template>

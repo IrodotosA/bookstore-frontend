@@ -1,0 +1,72 @@
+.wishlist-hero {
+  position: relative;
+  height: 200px;
+  background-image: url('/assets/hero-banner-1.jpg');
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  color: white;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+  }
+
+  * {
+    position: relative;
+    z-index: 2;
+  }
+}
+
+.wishlist-page {
+  max-width: 1300px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.empty-box {
+  text-align: center;
+  margin-top: 4rem;
+}
+
+.wishlist-heart {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  cursor: pointer;
+  z-index: 20;
+
+  i {
+    font-size: 1.6rem;
+    color: #c5c5c5;
+    transition: 0.15s ease;
+  }
+
+  i.filled {
+    color: #ff4d6d;
+  }
+
+  &:hover i {
+    transform: scale(1.15);
+  }
+}
+
+.wishlist-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.remove-btn-under {
+  margin-top: 0.75rem;
+  width: 100%;
+}
+
+.card-wrapper {
+  position: relative;
+}

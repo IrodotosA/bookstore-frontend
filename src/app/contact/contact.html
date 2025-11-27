@@ -1,0 +1,56 @@
+<div class="hero">
+    <div class="shop-hero-content">
+        <h1>Contact Us</h1>
+        <p>We’d love to hear from you. Fill out the form below.</p>
+    </div>
+</div>
+
+<section class="contact-section">
+
+  <form (ngSubmit)="submit()" class="contact-form">
+
+    <input
+      pInputText
+      type="text"
+      placeholder="Your Name"
+      [(ngModel)]="name"
+      name="name"
+    />
+
+    <input
+      pInputText
+      type="email"
+      placeholder="Your Email"
+      [(ngModel)]="email"
+      name="email"
+    />
+
+    <input
+      pInputText
+      type="text"
+      placeholder="Subject"
+      [(ngModel)]="subject"
+      name="subject"
+    />
+
+    <textarea
+      pTextarea
+      placeholder="Your Message"
+      [(ngModel)]="message"
+      name="message"
+    ></textarea>
+
+    <button
+      pButton
+      type="submit"
+      [disabled]="loading"
+      label="{{ loading ? 'Sending...' : 'Send Message' }}"
+      class="shop-more-btn"
+    ></button>
+
+  </form>
+
+  <p *ngIf="success" [class.ok]="success.ok" [class.error]="!success.ok">
+    {{ success.msg }}
+  </p>
+</section>

@@ -2,12 +2,28 @@
 
   <h1>Users</h1>
 
-  <p-table [value]="users" [loading]="loading" [rows]="10" [paginator]="true" [rowsPerPageOptions]="[5, 10, 25, 50]">
+  <div class="toolbar">
+    <input 
+      pInputText
+      placeholder="Search by name or email..."
+      [(ngModel)]="searchTerm"
+      (input)="filterUsers()"
+      style="width: 260px"
+    />
+  </div>
+
+  <p-table [value]="filteredUsers" [loading]="loading" [rows]="10" [paginator]="true" [rowsPerPageOptions]="[5, 10, 25, 50]">
     <ng-template pTemplate="header">
       <tr>
-        <th>Name</th>
-        <th>Email</th>
-        <th>Role</th>
+        <th pSortableColumn="name">
+          Name <p-sortIcon field="name"></p-sortIcon>
+        </th>
+        <th pSortableColumn="email">
+          Email <p-sortIcon field="email"></p-sortIcon>
+        </th>
+        <th pSortableColumn="role">
+          Role <p-sortIcon field="role"></p-sortIcon>
+        </th>
         <th>Actions</th>
       </tr>
     </ng-template>

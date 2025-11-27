@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { BookService } from '../services/book.service';
 import { CartService } from '../services/cart.service';
 import { FormsModule } from '@angular/forms';
@@ -14,6 +14,9 @@ import { InputIconModule } from 'primeng/inputicon';
 import { DialogModule } from 'primeng/dialog';
 import { HttpClientModule } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
+import { WishlistService } from '../services/wishlist.service';
+import { AuthService } from '../auth/auth.service';
+
 
 @Component({
   selector: 'app-shop',
@@ -40,11 +43,14 @@ export class Shop {
 
   constructor(
     private bookService: BookService,
-    private cartService: CartService
+    private cartService: CartService,
+    private wishlist: WishlistService,
+    private auth: AuthService
   ) {}
 
   books: any[] = [];
   filteredBooks: any[] = []
+  cart = inject(CartService);
   showFilters = false;
   loading = true;
   searchQuery: string = '';
@@ -67,26 +73,27 @@ export class Shop {
   selectedCategories: string[] = [];
 
   openDetails(book: any) {
-    this.selectedBook = null;     // clear old data
+    this.selectedBook = null;
+    this.addToCartBook = book;
     this.quantity = 1;
     this.showDetailsDialog = true;
 
     this.bookService.getBookById(book._id).subscribe({
-      next: (data) => {
-        this.selectedBook = data; // full data from backend
-      },
-      error: (err) => console.error(err)
+      next: (data) => (this.selectedBook = data),
+      error: (err) => console.error(err),
     });
   }
 
-  confirmAddToCart() {
-
-    this.cartService.addToCart(this.addToCartBook, this.quantity);
+  confirmAddToCart(event: Event) {
+    event.stopPropagation();
+    this.cart.addToCart(this.addToCartBook, this.quantity);
+    // close dialogs
     this.showAddToCartDialog = false;
+    this.showDetailsDialog = false;
 
-    // You can show a small toast later
-
-    this.showAddToCartDialog = false;
+    // reset
+    this.addToCartBook = null;
+    this.selectedBook = null;
   }
 
   openAddToCart(book: any) {
@@ -146,6 +153,22 @@ export class Shop {
     this.selectedSort = null;
     this.filteredBooks = [...this.books];
     this.showFilters = false;
+  }
+
+  toggleWishlist(book: any) {
+    if (!this.auth.isLoggedIn()) {
+      // optional: open login dialog
+      return;
+    }
+
+    this.wishlist.toggle(book._id).subscribe({
+      next: () => {},
+      error: (err) => console.error(err),
+    });
+  }
+
+  isInWishlist(bookId: string): boolean {
+    return this.wishlist.wishlistItems.includes(bookId);
   }
 
   ngOnInit() {

@@ -32,6 +32,8 @@ export class AdminOrders implements OnInit {
   selectedOrder: any | null = null;
   orders: any[] = [];
   loading = true;
+  searchTerm: string = '';
+  filteredOrders: any[] = [];
 
   // 👇 IMPORTANT: used by [expandedRowKeys]
   expandedRows: { [key: string]: boolean } = {};
@@ -82,10 +84,25 @@ export class AdminOrders implements OnInit {
     this.orderService.getAllOrders().subscribe({
       next: (data) => {
         this.orders = data;
+        this.filteredOrders = data;
         this.loading = false;
       },
       error: (err) => console.error(err)
     });
+  }
+
+  filterOrders() {
+    const term = this.searchTerm.toLowerCase().trim();
+
+    this.filteredOrders = this.orders.filter(order => {
+      const idMatch = order._id.toLowerCase().includes(term);
+      const emailMatch = order.billing?.email?.toLowerCase().includes(term);
+
+      return idMatch || emailMatch;
+    });
+
+    // reset expanded rows on new search
+    this.expandedRows = {};
   }
 
   expandAll() {

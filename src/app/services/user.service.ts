@@ -29,4 +29,12 @@ export class UserService {
       headers: { Authorization: `Bearer ${token}` }
     });
   }
+
+  updateMyProfile(data: any) {
+    return this.http.put<any>(`${this.apiUrl}/me`, data);
+  }
+
+  changePassword(data: { oldPassword: string; newPassword: string }) {
+    return this.http.put<any>(`${this.apiUrl}/change-password`, data);
+  }
 }

@@ -133,3 +133,62 @@
 .grid {
   margin-top: 20px;
 }
+
+.featured-badge {
+  position: absolute;
+  top: 10px;
+  right: 50px;
+  z-index: 10;
+
+  i {
+    font-size: 1.6rem;
+    color: #facc15; /* nice golden yellow */
+    // text-shadow: 0 2px 4px rgba(0,0,0,0.25); /* subtle depth */
+  }
+}
+
+.wishlist-heart {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  cursor: pointer;
+  z-index: 20;
+
+  i {
+    font-size: 1.6rem;
+    color: #c5c5c5;
+    transition: 0.15s ease;
+  }
+
+  i.filled {
+    color: #ff4d6d;
+  }
+
+  &:hover i {
+    transform: scale(1.15);
+  }
+}
+
+.details-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  .wishlist-heart {
+    cursor: pointer;
+
+    i {
+      font-size: 1.7rem;
+      color: #c5c5c5;
+      transition: 0.15s ease;
+    }
+
+    i.filled {
+      color: #eab308;
+    }
+  }
+}
+
+.card-wrapper {
+  position: relative;
+}

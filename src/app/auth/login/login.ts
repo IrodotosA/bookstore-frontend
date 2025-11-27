@@ -11,6 +11,7 @@ import { Router } from '@angular/router';
 import { RouterLink } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
 import { AuthService } from '../auth.service';
+import { WishlistService } from '../../services/wishlist.service';
 
 @Component({
   selector: 'app-login',
@@ -37,6 +38,7 @@ export class Login {
   constructor(
     private fb: FormBuilder, 
     private auth: AuthService,
+    private wishlist: WishlistService,
     private router: Router,
     private route: ActivatedRoute
   ) {
@@ -70,10 +72,18 @@ export class Login {
       next: (res) => {
         this.isLoading = false;
         this.auth.saveToken(res.token);
+          
+        // Load wishlist immediately after login
+        this.wishlist.loadWishlist().subscribe({
+          next: () => {
+            const redirectTo = this.route.snapshot.queryParams['redirectTo'] || '/';
+            this.router.navigate([redirectTo]);
+          }
+        });
+        
         const redirectTo = this.route.snapshot.queryParams['redirectTo'] || '/';
         console.log('Login success', res);
         this.router.navigate([redirectTo]);
-        // TODO: later we will navigate to /admin or /shop
       },
       error: (err) => {
         this.isLoading = false;

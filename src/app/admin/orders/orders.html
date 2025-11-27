@@ -1,8 +1,18 @@
 <div class="admin-orders">
   <h1>Orders</h1>
 
+  <div class="search-bar">
+    <input 
+      pInputText 
+      placeholder="Search by Order ID or Email..."
+      [(ngModel)]="searchTerm"
+      (input)="filterOrders()"
+      style="width: 250px"
+    />
+  </div>
+
   <p-table
-    [value]="orders"
+    [value]="filteredOrders"
     dataKey="_id"
     [loading]="loading"
     [paginator]="true"
@@ -24,10 +34,23 @@
     <ng-template #header>
       <tr>
         <th style="width: 5rem"></th>
-        <th>ID</th>
-        <th>User</th>
-        <th>Total (€)</th>
-        <th>Status</th>
+
+        <th pSortableColumn="_id">
+          ID <p-sortIcon field="_id"></p-sortIcon>
+        </th>
+
+        <th pSortableColumn="billing.email">
+          User <p-sortIcon field="billing.email"></p-sortIcon>
+        </th>
+
+        <th pSortableColumn="totalPrice">
+          Total (€) <p-sortIcon field="totalPrice"></p-sortIcon>
+        </th>
+
+        <th pSortableColumn="status">
+          Status <p-sortIcon field="status"></p-sortIcon>
+        </th>
+
         <th>Actions</th>
       </tr>
     </ng-template>

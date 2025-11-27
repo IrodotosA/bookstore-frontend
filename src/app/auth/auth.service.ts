@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 interface LoginResponse {
   token: string;
@@ -14,6 +15,9 @@ export class AuthService {
   // adjust if your backend port/path is different
   private apiUrl = 'http://localhost:4000';
 
+  private authState = new BehaviorSubject<boolean>(this.isLoggedIn());
+  authState$ = this.authState.asObservable();
+
   constructor(private http: HttpClient) {}
 
   login(credentials: { email: string; password: string }): Observable<LoginResponse> {
@@ -22,6 +26,7 @@ export class AuthService {
 
   saveToken(token: string) {
     localStorage.setItem('token', token);
+    this.authState.next(true);
   }
 
   getToken(): string | null {
@@ -34,6 +39,7 @@ export class AuthService {
 
   logout() {
     localStorage.removeItem('token');
+    this.authState.next(false);
   }
 
   register(data: { name: string; email: string; password: string }) {

@@ -14,12 +14,22 @@
   font-weight: bold;
   margin-top: 10px;
 }
+.chart-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  width: 100%;
+  padding-bottom: 1rem;
+
+  /* Makes scrolling smoother on mobile */
+  -webkit-overflow-scrolling: touch;
+}
 
 .chart-wrapper {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  height: 400px;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    height: auto;
+    min-width: 900px;
 }
 
 .loading-center {

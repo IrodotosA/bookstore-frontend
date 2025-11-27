@@ -62,3 +62,18 @@
     }
   }
 }
+
+.error {
+  color: #d32f2f; /* clean, accessible red */
+  font-size: 0.85rem;
+  margin-top: 0.3rem;
+
+  small {
+    color: inherit;
+  }
+}
+
+.server-error {
+  margin-top: 1rem;
+  font-weight: 600;
+}

@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
+import { ToggleButtonModule } from 'primeng/togglebutton';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { TextareaModule } from 'primeng/textarea';
@@ -17,6 +18,7 @@ import { BookService } from '../../services/book.service';
     FormsModule,
     TableModule,
     ButtonModule,
+    ToggleButtonModule,
     DialogModule,
     InputTextModule,
     TextareaModule,
@@ -33,6 +35,9 @@ export class AdminBooks implements OnInit {
     loading = true;
     selectedFile: File | null = null;
     previewImage: string | null = null;
+    expandedRows: { [key: string]: boolean } = {};
+    searchTerm: string = '';
+    filteredBooks: any[] = [];
 
     // Dialog state
     bookDialog = false;
@@ -55,15 +60,50 @@ export class AdminBooks implements OnInit {
     loadBooks() {
         this.loading = true;
         this.bookService.getAllBooks().subscribe({
-        next: (data) => {
+            next: (data) => {
             this.books = data;
+            this.filteredBooks = data; // <- IMPORTANT
             this.loading = false;
-        },
-        error: (err) => {
+            },
+            error: (err) => {
             console.error(err);
             this.loading = false;
-        }
+            }
         });
+    }
+
+    filterBooks() {
+        const term = this.searchTerm.toLowerCase().trim();
+
+        this.filteredBooks = this.books.filter(b => {
+            const titleMatch = b.title?.toLowerCase().includes(term);
+            const authorMatch = b.author?.toLowerCase().includes(term);
+            const categoryMatch = b.category?.toLowerCase().includes(term);
+
+            return titleMatch || authorMatch || categoryMatch;
+        });
+
+        // Reset expanded rows after filtering
+        this.expandedRows = {};
+    }
+
+    expandAll() {
+        this.expandedRows = this.books.reduce((acc, book) => {
+            acc[book._id] = true;
+            return acc;
+        }, {} as { [key: string]: boolean });
+    }
+
+    collapseAll() {
+        this.expandedRows = {};
+    }
+
+    onRowExpand(event: any) {
+        console.log('Expanded:', event.data);
+    }
+
+    onRowCollapse(event: any) {
+        console.log('Collapsed:', event.data);
     }
 
     openNew() {
@@ -102,6 +142,18 @@ export class AdminBooks implements OnInit {
         const reader = new FileReader();
         reader.onload = () => this.previewImage = reader.result as string;
         reader.readAsDataURL(file);
+    }
+
+    toggleFeatured(book: any) {
+        this.bookService.updateFeatured(book._id, !book.featured).subscribe({
+            next: (updated) => {
+            book.featured = updated.featured;  // Update instantly in table
+            },
+            error: (err) => {
+            console.error(err);
+            alert('Failed to update featured status');
+            }
+        });
     }
 
     deleteBook(book: any) {

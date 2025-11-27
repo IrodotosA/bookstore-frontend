@@ -28,9 +28,10 @@ export class AdminUsers implements OnInit {
 
   users: any[] = [];
   loading = true;
-
   userDialog = false;
   selectedUser: any = null;
+  searchTerm: string = '';
+  filteredUsers: any[] = [];
 
   roles = [
     { label: 'User', value: 'user' },
@@ -51,9 +52,20 @@ export class AdminUsers implements OnInit {
     this.userService.getAllUsers().subscribe({
       next: (data) => {
         this.users = data;
+        this.filteredUsers = data;   // IMPORTANT
         this.loading = false;
       },
       error: (err) => console.error(err)
+    });
+  }
+
+  filterUsers() {
+    const term = this.searchTerm.toLowerCase().trim();
+
+    this.filteredUsers = this.users.filter(u => {
+      const nameMatch = u.name?.toLowerCase().includes(term);
+      const emailMatch = u.email?.toLowerCase().includes(term);
+      return nameMatch || emailMatch;
     });
   }
 
