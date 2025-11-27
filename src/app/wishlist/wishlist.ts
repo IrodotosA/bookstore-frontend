@@ -8,6 +8,9 @@ import { CardModule } from 'primeng/card';
 import { CartService } from '../services/cart.service';
 import { DialogModule } from 'primeng/dialog';
 import { InputNumberModule } from 'primeng/inputnumber';
+import { InputTextModule } from 'primeng/inputtext';
+import { IconFieldModule } from 'primeng/iconfield';
+import { InputIconModule } from 'primeng/inputicon';
 import { FormsModule } from '@angular/forms';
 
 @Component({
@@ -20,6 +23,9 @@ import { FormsModule } from '@angular/forms';
     CardModule,
     DialogModule,
     InputNumberModule,
+    InputTextModule,
+    IconFieldModule,
+    InputIconModule,
     FormsModule
   ],
   templateUrl: './wishlist.html',
@@ -44,11 +50,14 @@ export class Wishlist implements OnInit {
 
   quantity = 1;
 
+  searchQuery: string = '';
+  filteredBooks: any[] = [];
+
   ngOnInit() {
-    // subscribe to wishlist ID changes
     this.wishlist.wishlist$.subscribe(ids => {
       if (ids.length === 0) {
         this.books = [];
+        this.filteredBooks = [];
         this.loading = false;
         return;
       }
@@ -56,11 +65,27 @@ export class Wishlist implements OnInit {
       this.bookService.getAllBooks().subscribe({
         next: allBooks => {
           this.books = allBooks.filter(b => ids.includes(b._id));
+          this.filteredBooks = [...this.books];  // default
           this.loading = false;
         },
         error: () => this.loading = false
       });
     });
+  }
+
+  applySearch() {
+    const q = this.searchQuery.toLowerCase().trim();
+
+    if (q === '') {
+      this.filteredBooks = [...this.books];
+      return;
+    }
+
+    this.filteredBooks = this.books.filter(book =>
+      book.title.toLowerCase().includes(q) ||
+      book.author.toLowerCase().includes(q) ||
+      book.category.toLowerCase().includes(q)
+    );
   }
 
   // DETAILS DIALOG

@@ -8,6 +8,23 @@
 
 <div class="wishlist-page">
 
+    <div class="wishlist-search" *ngIf="books.length > 0">
+        <p-iconfield iconPosition="left" class="w-full md:w-6">
+            <p-inputicon>
+            <i class="pi pi-search"></i>
+            </p-inputicon>
+
+            <input
+            pInputText
+            type="text"
+            placeholder="Search wishlist..."
+            class="w-full"
+            [(ngModel)]="searchQuery"
+            (input)="applySearch()"
+            />
+        </p-iconfield>
+    </div>
+
   <!-- Empty -->
   <div *ngIf="!loading && books.length === 0" class="empty-box">
     <h2>Your wishlist is empty</h2>
@@ -23,7 +40,7 @@
 
   <!-- Wishlist Grid -->
   <div class="grid p-3" *ngIf="books.length > 0">
-    <div class="col-12 md:col-6 lg:col-4" *ngFor="let book of books">
+    <div class="col-12 md:col-6 lg:col-4" *ngFor="let book of filteredBooks">
 
       <div class="card-wrapper">
       <p-card styleClass="h-full">
