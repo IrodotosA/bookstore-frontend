@@ -9,6 +9,7 @@ import { TextareaModule } from 'primeng/textarea';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { FormsModule } from '@angular/forms';
 import { BookService } from '../../services/book.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-admin-books',
@@ -30,7 +31,7 @@ import { BookService } from '../../services/book.service';
 })
 export class AdminBooks implements OnInit {
     private bookService = inject(BookService);
-
+    apiUrl = environment.apiUrl;
     books: any[] = [];
     loading = true;
     selectedFile: File | null = null;

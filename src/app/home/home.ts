@@ -8,7 +8,7 @@ import { DialogModule } from 'primeng/dialog';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { CardModule } from 'primeng/card';
 import { FormsModule } from '@angular/forms';
-
+import { environment } from '../../environments/environment';
 import { BookService } from '../services/book.service';
 import { CartService } from '../services/cart.service';
 
@@ -40,6 +40,7 @@ export class Home implements OnInit {
   quantity: number = 1;
   cart = inject(CartService);
   private bookService = inject(BookService);
+  apiUrl = environment.apiUrl;
 
   ngOnInit() {
     this.updateIsMobile();

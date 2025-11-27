@@ -12,6 +12,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { FormsModule } from '@angular/forms';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-wishlist',
@@ -37,7 +38,7 @@ export class Wishlist implements OnInit {
   bookService = inject(BookService);
   cart = inject(CartService);
   router = inject(Router);
-
+  apiUrl = environment.apiUrl;
   books: any[] = [];
   loading = true;
 

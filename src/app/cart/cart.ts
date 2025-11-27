@@ -7,6 +7,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule, Router  } from '@angular/router';
 import { DialogModule } from 'primeng/dialog';
 import { AuthService } from '../auth/auth.service';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-cart',
@@ -20,6 +21,7 @@ export class Cart {
   auth = inject(AuthService);
   router = inject(Router);
   showLoginDialog = false;
+  apiUrl = environment.apiUrl;
 
   handleCheckout() {
     if (this.auth.isLoggedIn()) {

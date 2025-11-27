@@ -16,6 +16,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { WishlistService } from '../services/wishlist.service';
 import { AuthService } from '../auth/auth.service';
+import { environment } from '../../environments/environment';
 
 
 @Component({
@@ -59,7 +60,7 @@ export class Shop {
   quantity: number = 1;
   showAddToCartDialog: boolean = false;
   addToCartBook: any = null;
-
+  apiUrl = environment.apiUrl;
   visibleBooks: any[] = [];
   itemsPerPage = 9;
   currentIndex = 0;

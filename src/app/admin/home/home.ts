@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-
+import { environment } from '../../../environments/environment';
 import { CardModule } from 'primeng/card';
 import { ChartModule } from 'primeng/chart';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
@@ -53,7 +53,7 @@ export class HomeAdmin implements OnInit {
   }
 
   loadDashboard() {
-    this.http.get<any>('http://localhost:4000/api/admin/dashboard')
+    this.http.get<any>(`${environment.apiUrl}/api/admin/dashboard`)
       .subscribe({
         next: (data) => {
           this.totalRevenue = data.totalRevenueLast30Days;

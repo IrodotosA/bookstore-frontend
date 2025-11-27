@@ -108,7 +108,7 @@
         </div>
 
         <img
-          [src]="'http://localhost:4000' + book.imageUrl"
+          [src]="apiUrl + book.imageUrl"
           [alt]="book.title"
           class="w-full h-15rem object-cover mb-3"
         />
@@ -226,7 +226,7 @@
     <div *ngIf="selectedBook">
 
       <img 
-        [src]="'http://localhost:4000' + selectedBook.imageUrl"
+        [src]="apiUrl + selectedBook.imageUrl"
         [alt]="selectedBook.title"
         class="w-full mb-3 border-round">
 
