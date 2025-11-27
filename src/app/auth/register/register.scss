@@ -52,3 +52,20 @@ button {
     }
   }
 }
+
+.p-password {
+  position: relative;
+  display: inline-flex;
+  width: 100%;
+}
+
+.p-password-input {
+  width: 100%;
+}
+
+.p-password .p-password-toggle-icon {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+}
