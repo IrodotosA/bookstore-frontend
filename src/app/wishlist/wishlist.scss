@@ -93,3 +93,24 @@
   margin-left: 1rem;
   white-space: nowrap; /* prevents text wrapping */
 }
+
+/* 📱 MOBILE LAYOUT */
+@media (max-width: 600px) {
+  .wishlist-search {
+    flex-direction: column;
+    align-items: stretch;        /* makes children full width */
+    padding: 0 .5rem;            /* small side padding */
+    gap: 0.5rem;                 /* small vertical spacing */
+  }
+
+  .wishlist-search p-iconfield {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;                   
+  }
+
+  .wishlist-search button {
+    width: 100%;
+    margin-left: 0 !important;   /* remove desktop left margin */
+  }
+}
