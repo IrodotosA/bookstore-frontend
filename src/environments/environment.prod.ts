@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://bookstore-backend-dnxb.onrender.com/'
+  apiUrl: 'https://bookstore-backend-dnxb.onrender.com'
 };
