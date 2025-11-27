@@ -35,42 +35,44 @@
 
     <!-- PASSWORD -->
     <div class="float-container">
-        <p-floatLabel variant="on">
-            <input
-            id="password"
-            pPassword
-            formControlName="password"
-            toggleMask="true"
-            inputClass="p-password-input"
-            />
-            <label for="password">Password</label>
-        </p-floatLabel>
+      <p-floatLabel variant="on">
+        <p-password
+          id="password"
+          formControlName="password"
+          [feedback]="false"
+          [toggleMask]="true"
+          inputStyleClass="password-input"
+          styleClass="password-wrapper"
+        ></p-password>
+        <label for="password">Password</label>
+      </p-floatLabel>
 
-        <div class="error" *ngIf="password?.touched && password?.invalid">
-            Password must be at least 6 characters.
-        </div>
+      <div class="error" *ngIf="password?.touched && password?.invalid">
+        Password must be at least 6 characters.
+      </div>
     </div>
 
-      <!-- CONFIRM PASSWORD -->
-      <div class="float-container">
-        <p-floatLabel variant="on">
-            <input
-            id="confirmPassword"
-            pPassword
-            formControlName="confirmPassword"
-            toggleMask="true"
-            inputClass="p-password-input"
-            />
-            <label for="confirmPassword">Confirm Password</label>
-        </p-floatLabel>
+    <!-- CONFIRM PASSWORD -->
+    <div class="float-container">
+      <p-floatLabel variant="on">
+        <p-password
+          id="confirmPassword"
+          formControlName="confirmPassword"
+          [feedback]="false"
+          [toggleMask]="true"
+          inputStyleClass="password-input"
+          styleClass="password-wrapper"
+        ></p-password>
+        <label for="confirmPassword">Confirm Password</label>
+      </p-floatLabel>
 
-        <div class="error" *ngIf="confirmPassword?.touched && confirmPassword?.invalid">
-            Confirm your password.
-        </div>
+      <div class="error" *ngIf="confirmPassword?.touched && confirmPassword?.invalid">
+        Confirm your password.
+      </div>
 
-        <div class="error" *ngIf="registerForm.errors?.['passwordMismatch']">
-            Passwords do not match.
-        </div>
+      <div class="error" *ngIf="registerForm.errors?.['passwordMismatch']">
+        Passwords do not match.
+      </div>
     </div>
 
       <!-- SERVER ERROR -->

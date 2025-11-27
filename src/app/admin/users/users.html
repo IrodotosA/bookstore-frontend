@@ -54,16 +54,6 @@
   <div class="form-grid">
 
     <div class="field">
-      <label>Name</label>
-      <input pInputText [(ngModel)]="form.name" />
-    </div>
-
-    <div class="field">
-      <label>Email</label>
-      <input pInputText [(ngModel)]="form.email" />
-    </div>
-
-    <div class="field">
       <label>Role</label>
       <p-select
         [options]="roles"
@@ -71,6 +61,16 @@
         optionValue="value"
         [(ngModel)]="form.role"
       ></p-select>
+    </div>
+
+    <div class="field">
+      <label>Name</label>
+      <input pInputText [(ngModel)]="form.name" />
+    </div>
+
+    <div class="field">
+      <label>Email</label>
+      <input pInputText [(ngModel)]="form.email" />
     </div>
 
   </div>
