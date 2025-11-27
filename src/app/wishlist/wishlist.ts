@@ -73,6 +73,13 @@ export class Wishlist implements OnInit {
     });
   }
 
+  emptyWishlist() {
+    this.wishlist.clearAll().subscribe(() => {
+      this.books = [];
+      this.filteredBooks = [];
+    });
+  }
+
   applySearch() {
     const q = this.searchQuery.toLowerCase().trim();
 

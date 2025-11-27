@@ -72,7 +72,24 @@
 }
 
 .wishlist-search {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  
+  /* spacing so it doesn't touch edges */
   max-width: 1300px;
   margin: 2rem auto 1rem auto;
   padding: 0 1rem;
+}
+
+/* Ensure search field doesn’t shrink */
+.wishlist-search p-iconfield {
+  flex: 1;
+  max-width: 600px;  /* adjust to your preference */
+}
+
+/* Add spacing between search and button */
+.wishlist-search button {
+  margin-left: 1rem;
+  white-space: nowrap; /* prevents text wrapping */
 }

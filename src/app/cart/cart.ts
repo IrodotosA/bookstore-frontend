@@ -56,4 +56,8 @@ export class Cart {
   get totalPrice() {
     return this.cart.getTotalPrice();
   }
+
+  emptyCart() {
+    this.cart.clearCart();
+  }
 }

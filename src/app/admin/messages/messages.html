@@ -14,6 +14,7 @@
 
   <p-table
     [value]="filteredMessages"
+    sortMode="single"
     dataKey="_id"
     [loading]="loading"
     [paginator]="true"
@@ -34,10 +35,25 @@
     <ng-template pTemplate="header">
       <tr>
         <th style="width: 5rem"></th>
-        <th>Name</th>
-        <th>Email</th>
-        <th>Subject</th>
-        <th>Date</th>
+        <th pSortableColumn="name">
+          Name
+          <p-sortIcon field="name"></p-sortIcon>
+        </th>
+
+        <th pSortableColumn="email">
+          Email
+          <p-sortIcon field="email"></p-sortIcon>
+        </th>
+
+        <th pSortableColumn="subject">
+          Subject
+          <p-sortIcon field="subject"></p-sortIcon>
+        </th>
+
+        <th pSortableColumn="createdAt">
+          Date
+          <p-sortIcon field="createdAt"></p-sortIcon>
+        </th>
         <th>Actions</th>
       </tr>
     </ng-template>

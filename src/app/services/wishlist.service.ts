@@ -85,4 +85,10 @@ export class WishlistService {
             })
         );
     }
+
+    clearAll(): Observable<boolean> {
+      this.wishlistItems = [];
+      this._wishlist$.next([]);
+      return of(true);
+    }
 }

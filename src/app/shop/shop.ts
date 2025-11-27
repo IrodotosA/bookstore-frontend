@@ -60,6 +60,10 @@ export class Shop {
   showAddToCartDialog: boolean = false;
   addToCartBook: any = null;
 
+  visibleBooks: any[] = [];
+  itemsPerPage = 9;
+  currentIndex = 0;
+
   sortOptions = [
     { label: 'Price: Low → High', value: 'priceAsc' },
     { label: 'Price: High → Low', value: 'priceDesc' },
@@ -124,20 +128,14 @@ export class Shop {
       );
     }
 
-    // Category filter
     if (this.selectedCategories.length > 0) {
       result = result.filter(book =>
         this.selectedCategories.includes(book.category)
       );
     }
 
-    // Sorting
-    if (this.selectedSort === 'priceAsc') {
-      result.sort((a, b) => a.price - b.price);
-    }
-    if (this.selectedSort === 'priceDesc') {
-      result.sort((a, b) => b.price - a.price);
-    }
+    if (this.selectedSort === 'priceAsc') result.sort((a, b) => a.price - b.price);
+    if (this.selectedSort === 'priceDesc') result.sort((a, b) => b.price - a.price);
     if (this.selectedSort === 'newest') {
       result.sort((a, b) =>
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
@@ -145,6 +143,10 @@ export class Shop {
     }
 
     this.filteredBooks = result;
+
+    // VERY IMPORTANT
+    this.resetVisibleBooks();
+
     this.showFilters = false;
   }
 
@@ -171,6 +173,19 @@ export class Shop {
     return this.wishlist.wishlistItems.includes(bookId);
   }
 
+  resetVisibleBooks() {
+    this.currentIndex = this.itemsPerPage;
+    this.visibleBooks = this.filteredBooks.slice(0, this.itemsPerPage);
+  }
+
+  loadMore() {
+    const nextIndex = this.currentIndex + this.itemsPerPage;
+    const nextChunk = this.filteredBooks.slice(this.currentIndex, nextIndex);
+
+    this.visibleBooks = [...this.visibleBooks, ...nextChunk];
+    this.currentIndex = nextIndex;
+  }
+
   ngOnInit() {
     this.bookService.getAllBooks().subscribe({
       next: (data) => {
@@ -179,6 +194,7 @@ export class Shop {
         this.allCategories = Array
           .from(new Set(data.map(b => b.category)))
           .sort();
+        this.resetVisibleBooks();
         this.loading = false;
       },
       error: (err) => {

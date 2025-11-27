@@ -192,3 +192,14 @@
 .card-wrapper {
   position: relative;
 }
+
+.load-more-wrapper {
+  display: flex;
+  justify-content: center;
+  margin: 2rem 0;        /* top + bottom space */
+}
+
+.load-more-btn {
+  padding: 0.8rem 2rem;
+  font-size: 1rem;
+}

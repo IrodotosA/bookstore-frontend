@@ -72,6 +72,16 @@ export class AdminBooks implements OnInit {
         });
     }
 
+    resetFormState() {
+        this.selectedFile = null;
+        this.previewImage = null;
+
+        // Clear the file input element if it exists
+        const fileInput = document.getElementById("book-image-input") as HTMLInputElement;
+        if (fileInput) fileInput.value = "";
+    }
+
+
     filterBooks() {
         const term = this.searchTerm.toLowerCase().trim();
 
@@ -116,6 +126,8 @@ export class AdminBooks implements OnInit {
         price: 0,
         description: ''
         };
+
+        this.resetFormState();
         this.bookDialog = true;
     }
 
@@ -193,6 +205,7 @@ export class AdminBooks implements OnInit {
                     const idx = this.books.findIndex(b => b._id === this.selectedBook!._id);
                     if (idx !== -1) this.books[idx] = updated;
 
+                    this.resetFormState();
                     this.bookDialog = false;
                     this.selectedFile = null;
                 },
@@ -208,7 +221,7 @@ export class AdminBooks implements OnInit {
             this.bookService.createBook(fd).subscribe({
                 next: (created) => {
                     this.books.unshift(created);
-
+                    this.resetFormState();
                     this.bookDialog = false;
                     this.selectedFile = null;
                 },
@@ -221,6 +234,7 @@ export class AdminBooks implements OnInit {
     }
 
     hideDialog() {
+        this.resetFormState();
         this.bookDialog = false;
     }
 }

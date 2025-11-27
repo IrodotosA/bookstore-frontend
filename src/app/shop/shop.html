@@ -92,7 +92,7 @@
     </div>
 
     <!-- Book Cards -->
-    <div class="col-12 md:col-6 lg:col-4" *ngFor="let book of filteredBooks">
+    <div class="col-12 md:col-6 lg:col-4" *ngFor="let book of visibleBooks">
       <div class="card-wrapper">
       <p-card styleClass="h-full">
 
@@ -283,4 +283,13 @@
     </div>
 
   </p-dialog>
+  
+  <div class="load-more-wrapper" *ngIf="visibleBooks.length < filteredBooks.length">
+    <button 
+      pButton 
+      label="Load More" 
+      class="load-more-btn"
+      (click)="loadMore()">
+    </button>
+  </div>
 </div>

@@ -101,6 +101,13 @@
         class="w-full">
       </button>
 
+      <button 
+        pButton 
+        label="Empty Cart"
+        class="p-button-danger w-full mt-2"
+        (click)="emptyCart()">
+      </button>
+
       <p-dialog 
         [(visible)]="showLoginDialog"
         [modal]="true"
