@@ -69,7 +69,7 @@ export class Shop {
   selectedSort: string | null = null;
 
   // Categories
-  allCategories = ['Fantasy', 'Mystery', 'Sci-Fi', 'Horror'];
+  allCategories: string[] = [];
   selectedCategories: string[] = [];
 
   openDetails(book: any) {
@@ -176,6 +176,9 @@ export class Shop {
       next: (data) => {
         this.books = data;
         this.filteredBooks = [...data];
+        this.allCategories = Array
+          .from(new Set(data.map(b => b.category)))
+          .sort();
         this.loading = false;
       },
       error: (err) => {
