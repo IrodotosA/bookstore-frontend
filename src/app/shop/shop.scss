@@ -54,10 +54,17 @@
   padding: 0 2rem;                   /* ← same left/right padding */
 }
 
+/* MOBILE: stack vertically */
 @media (max-width: 768px) {
   .filters-header {
-    padding: 0 0.5rem;      /* smaller spacing on phones */
-    margin-top: 1rem;     /* slightly less top space */
+    flex-direction: column;
+    align-items: stretch; /* make children full width */
+  }
+
+  .filters-header p-iconfield,
+  .filters-header .filter-btn {
+    width: 100%;
+    margin: 5px; /* remove side margins */
   }
 }
 

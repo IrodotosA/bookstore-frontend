@@ -8,13 +8,14 @@
       placeholder="Search by title, author or category..."
       [(ngModel)]="searchTerm"
       (input)="filterBooks()"
-      style="width: 260px; margin-right: 1rem;"
+      class="toolbar-input"
     />
 
     <button 
       pButton 
       label="Add Book" 
       icon="pi pi-plus"
+      class="toolbar-btn"
       (click)="openNew()">
     </button>
   </div>
