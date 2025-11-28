@@ -134,6 +134,12 @@
   margin-top: 20px;
 }
 
+@media (max-width: 768px) {
+  .book-title-mobile {
+    margin-top: 10px; /* adjust as needed */
+  }
+}
+
 .featured-badge {
   position: absolute;
   top: 10px;
