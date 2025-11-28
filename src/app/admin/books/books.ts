@@ -175,6 +175,8 @@ export class AdminBooks implements OnInit {
         this.bookService.deleteBook(book._id).subscribe({
         next: () => {
             this.books = this.books.filter(b => b._id !== book._id);
+            this.filteredBooks = this.filteredBooks.filter(b => b._id !== book._id);
+            delete this.expandedRows[book._id];
         },
         error: (err) => {
             console.error(err);

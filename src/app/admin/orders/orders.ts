@@ -203,6 +203,8 @@ export class AdminOrders implements OnInit {
     this.orderService.deleteOrder(order._id).subscribe({
       next: () => {
         this.orders = this.orders.filter(o => o._id !== order._id);
+        this.filteredOrders = this.filteredOrders.filter(o => o._id !== order._id);
+        delete this.expandedRows[order._id];
       },
       error: (err) => console.error(err)
     });

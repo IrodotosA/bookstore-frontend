@@ -85,6 +85,7 @@ export class AdminUsers implements OnInit {
     this.userService.deleteUser(user._id).subscribe({
       next: () => {
         this.users = this.users.filter(u => u._id !== user._id);
+        this.filteredUsers = this.filteredUsers.filter(u => u._id !== user._id);
       }
     });
   }
