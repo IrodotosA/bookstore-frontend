@@ -10,10 +10,21 @@
 
   <div class="orders-container">
 
-    <h2>Your Orders</h2>
-
     <p *ngIf="loading">Loading orders...</p>
-    <p *ngIf="!loading && orders.length === 0">You have no orders yet.</p>
+    <!-- <p *ngIf="!loading && orders.length === 0">You have no orders yet.</p> -->
+
+    <div *ngIf="!loading && orders.length === 0" class="empty-orders">
+      <h2>You have no previous orders</h2>
+      <p>It seems you haven't bought anything yet. Start exploring books!</p>
+
+      <button
+        pButton
+        label="Browse Books"
+        icon="pi pi-arrow-right"
+        class="shop-more-btn empty-btn"
+        routerLink="/shop"
+      ></button>
+    </div>
 
     <p-accordion [value]="0" *ngIf="orders.length > 0">
 

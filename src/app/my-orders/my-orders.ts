@@ -6,7 +6,7 @@ import { AccordionModule } from 'primeng/accordion';
 import { CardModule } from 'primeng/card';
 import { TagModule } from 'primeng/tag';
 import { ButtonModule } from 'primeng/button';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { DecimalPipe } from '@angular/common';
 
 @Component({
@@ -18,6 +18,7 @@ import { DecimalPipe } from '@angular/common';
     CardModule,
     TagModule,
     ButtonModule,
+    RouterModule,
     DecimalPipe
   ],
   templateUrl: './my-orders.html',
