@@ -37,8 +37,8 @@ export class Checkout {
   };
 
   testCards = [
-    { type: "Visa", number: "4111 1111 1111 1111", exp: "12/28", cvv: "123" },
-    { type: "Mastercard", number: "5555 5555 5555 4444", exp: "12/28", cvv: "123" }
+    { type: "Visa", number: "4111 1111 1111 1111", name: "John Doe", exp: "12/28", cvv: "123" },
+    { type: "Mastercard", number: "5555 5555 5555 4444", name: "John Doe", exp: "12/28", cvv: "123" }
   ];
 
   card = {
@@ -92,12 +92,14 @@ export class Checkout {
   isFormValid() {
     return (
       this.customer.name &&
-      this.customer.email &&
       this.customer.phone &&
       this.customer.address &&
       this.customer.city &&
       this.customer.postalCode &&
-      this.customer.country
+      this.customer.country &&
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.customer.email) &&  // email regex
+      /^[0-9+]+$/.test(this.customer.phone) &&                  // phone regex
+      /^[0-9]+$/.test(this.customer.postalCode)                // postal code regex
     );
   }
 

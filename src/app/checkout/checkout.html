@@ -23,12 +23,35 @@
 
                 <div>
                 <label>Email</label>
-                <input pInputText [(ngModel)]="customer.email" name="email" required />
+                <input 
+                pInputText
+                type="email"
+                [(ngModel)]="customer.email"
+                name="email"
+                required
+                [email]="true"
+                #emailRef="ngModel"
+                />
+
+                <div class="card-error" *ngIf="emailRef.invalid && emailRef.touched">
+                Please enter a valid email address.
+                </div>
                 </div>
 
                 <div>
                 <label>Phone</label>
-                <input pInputText [(ngModel)]="customer.phone" name="phone" required />
+                <input 
+                pInputText 
+                [(ngModel)]="customer.phone" 
+                name="phone" 
+                required
+                pattern="^[0-9+]+$"
+                #phoneRef="ngModel"
+                />
+
+                <div class="card-error" *ngIf="phoneRef.invalid && phoneRef.touched">
+                Phone must contain only numbers and + symbol.
+                </div>
                 </div>
 
                 <div>
@@ -43,7 +66,18 @@
 
                 <div>
                 <label>Postal Code</label>
-                <input pInputText [(ngModel)]="customer.postalCode" name="postal" required />
+                <input 
+                pInputText
+                [(ngModel)]="customer.postalCode"
+                name="postalCode"
+                required
+                pattern="^[0-9]*$"
+                #postalRef="ngModel"
+                />
+
+                <div class="card-error" *ngIf="postalRef.invalid && postalRef.touched">
+                Postal code must contain only numbers.
+                </div>
                 </div>
 
                 <div>
@@ -149,7 +183,7 @@
 
                 <ul>
                 <li *ngFor="let t of testCards">
-                    <strong>{{ t.type }}:</strong> {{ t.number }} — Exp: {{ t.exp }} — CVV: {{ t.cvv }}
+                    <strong>{{ t.type }}:</strong> {{ t.number }} — Name: {{ t.name }} — Exp: {{ t.exp }} — CVV: {{ t.cvv }}
                 </li>
                 </ul>
             </div>
