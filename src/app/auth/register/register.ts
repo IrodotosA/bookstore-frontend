@@ -61,11 +61,26 @@ export class Register {
         password: this.fb.control('', [
           Validators.required,
           Validators.minLength(6),
+          Register.strongPassword
         ]),
         confirmPassword: this.fb.control('', Validators.required),
       },
       { validators: [Register.passwordMatchValidator] }
     );
+  }
+
+  static strongPassword(control: AbstractControl): ValidationErrors | null {
+    const value = control.value;
+    if (!value) return null;
+
+    const hasUpper = /[A-Z]/.test(value);
+    const hasLower = /[a-z]/.test(value);
+    const hasNumber = /[0-9]/.test(value);
+    const hasSymbol = /[^A-Za-z0-9]/.test(value);
+
+    const valid = hasUpper && hasLower && hasNumber && hasSymbol;
+
+    return valid ? null : { weakPassword: true };
   }
 
   // Getters

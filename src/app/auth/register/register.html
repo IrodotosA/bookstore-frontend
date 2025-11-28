@@ -48,7 +48,23 @@
       </p-floatLabel>
 
       <div class="error" *ngIf="password?.touched && password?.invalid">
-        Password must be at least 6 characters.
+
+        <!-- Too short -->
+        <ng-container *ngIf="password?.errors?.['minlength']">
+          Password must be at least 6 characters.
+        </ng-container>
+
+        <!-- Weak password -->
+        <ng-container *ngIf="password?.errors?.['weakPassword']">
+          Password must include:
+          <ul>
+            <li>One uppercase letter</li>
+            <li>One lowercase letter</li>
+            <li>One number</li>
+            <li>One special symbol (!@#$%^&*)</li>
+          </ul>
+        </ng-container>
+
       </div>
     </div>
 
