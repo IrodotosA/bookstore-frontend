@@ -119,6 +119,20 @@
               <p><strong>Country:</strong> {{ order.billing?.country }}</p>
             </div>
 
+            <h4>Payment Method</h4>
+            <div class="billing-grid">
+
+              <p>
+                <strong>Method:</strong>
+                {{ order.paymentMethod === 'cod' ? 'Cash on Delivery' : 'Card' }}
+              </p>
+
+              <p *ngIf="order.paymentMethod !== 'cod'">
+                <strong>Card:</strong> **** **** {{ order.cardLast4 }}
+              </p>
+
+            </div>
+
           </div>
         </td>
       </tr>
