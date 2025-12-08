@@ -17,10 +17,17 @@
             <label for="email">Email</label>
           </p-floatLabel>
 
-          <div class="error" *ngIf="email?.touched && email!.invalid">
-            <small *ngIf="email?.errors?.['required']">Email is required.</small>
-            <small *ngIf="email?.errors?.['email']">Enter a valid email.</small>
-          </div>
+          <p-message
+            *ngIf="email?.touched && email?.hasError('required')"
+            severity="error"
+            text="Email is required">
+          </p-message>
+
+          <p-message
+            *ngIf="email?.touched && email?.hasError('email')"
+            severity="error"
+            text="Enter a valid email">
+          </p-message>
         </div>
 
         <!-- PASSWORD -->
@@ -36,20 +43,28 @@
             ></p-password>
             <label for="password">Password</label>
           </p-floatLabel>
+          
+          <p-message
+            *ngIf="password?.touched && password?.hasError('required')"
+            severity="error"
+            text="Password is required">
+          </p-message>
 
-          <div class="error" *ngIf="password?.touched && password!.invalid">
-            <small *ngIf="password?.errors?.['required']">Password is required.</small>
-            <small *ngIf="password?.errors?.['minlength']">
-              Must be at least 6 characters.
-            </small>
-          </div>
+          <p-message
+            *ngIf="password?.touched && password?.hasError('minlength')"
+            severity="error"
+            text="Must be at least 6 characters">
+          </p-message>
         </div>
       </div>
 
       <!-- backend error -->
-      <div class="error server-error" *ngIf="errorMessage">
-        <small>{{ errorMessage }}</small>
-      </div>
+      <p-message
+        *ngIf="errorMessage"
+        severity="error"
+        [text]="errorMessage"
+        class="server-error">
+      </p-message>
 
       <button
         pButton

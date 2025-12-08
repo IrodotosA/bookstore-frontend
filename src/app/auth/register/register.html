@@ -15,9 +15,11 @@
         />
         <label for="name">Full Name</label>
       </p-floatLabel>
-    <div class="error" *ngIf="name?.touched && name?.invalid">
-        Name is required.
-    </div>
+      <p-message
+        *ngIf="name?.touched && name?.hasError('required')"
+        severity="error"
+        text="Name is required"
+      ></p-message>
 
       <!-- EMAIL -->
       <p-floatLabel variant="on">
@@ -29,9 +31,17 @@
         />
         <label for="email">Email</label>
       </p-floatLabel>
-    <div class="error" *ngIf="email?.touched && email?.invalid">
-        Valid email is required.
-    </div>
+      <p-message
+        *ngIf="email?.touched && email?.hasError('required')"
+        severity="error"
+        text="Email is required"
+      ></p-message>
+
+      <p-message
+        *ngIf="email?.touched && email?.hasError('email')"
+        severity="error"
+        text="Please enter a valid email address"
+      ></p-message>
 
     <!-- PASSWORD -->
     <div class="float-container">
@@ -47,25 +57,23 @@
         <label for="password">Password</label>
       </p-floatLabel>
 
-      <div class="error" *ngIf="password?.touched && password?.invalid">
+      <p-message 
+        *ngIf="password?.touched && password?.hasError('required')"
+        severity="error"
+        text="Password is required">
+      </p-message>
 
-        <!-- Too short -->
-        <ng-container *ngIf="password?.errors?.['minlength']">
-          Password must be at least 6 characters.
-        </ng-container>
+      <p-message 
+        *ngIf="password?.touched && password?.hasError('minlength')"
+        severity="error"
+        text="Password must be at least 6 characters">
+      </p-message>
 
-        <!-- Weak password -->
-        <ng-container *ngIf="password?.errors?.['weakPassword']">
-          Password must include:
-          <ul>
-            <li>One uppercase letter</li>
-            <li>One lowercase letter</li>
-            <li>One number</li>
-            <li>One special symbol (!@#$%^&*)</li>
-          </ul>
-        </ng-container>
-
-      </div>
+      <p-message 
+        *ngIf="password?.touched && password?.hasError('weakPassword')"
+        severity="error"
+        text="Password must include uppercase, lowercase, number, and symbol">
+      </p-message>
     </div>
 
     <!-- CONFIRM PASSWORD -->
@@ -82,13 +90,17 @@
         <label for="confirmPassword">Confirm Password</label>
       </p-floatLabel>
 
-      <div class="error" *ngIf="confirmPassword?.touched && confirmPassword?.invalid">
-        Confirm your password.
-      </div>
+      <p-message
+        *ngIf="confirmPassword?.touched && confirmPassword?.hasError('required')"
+        severity="error"
+        text="Please confirm your password">
+      </p-message>
 
-      <div class="error" *ngIf="registerForm.errors?.['passwordMismatch']">
-        Passwords do not match.
-      </div>
+      <p-message
+        *ngIf="registerForm.touched && registerForm.errors?.['passwordMismatch']"
+        severity="error"
+        text="Passwords do not match">
+      </p-message>
     </div>
 
       <!-- SERVER ERROR -->

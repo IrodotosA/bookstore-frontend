@@ -1,48 +1,119 @@
 <div class="settings-page">
   <h1>Account Settings</h1>
 
+  <!-- PROFILE CARD -->
   <div class="card">
-
     <h2>Profile Information</h2>
 
-    <div class="form-grid">
-      <div class="field">
-        <label>Name</label>
-        <input pInputText [(ngModel)]="form.name" />
+    <form [formGroup]="profileForm" (ngSubmit)="saveProfile()">
+      <div class="form-grid">
+
+        <!-- NAME -->
+        <div class="field">
+          <label>Name</label>
+          <input pInputText formControlName="name" />
+          <p-message 
+            *ngIf="pf['name'].touched && pf['name'].hasError('required')"
+            severity="error"
+            text="Name is required">
+          </p-message>
+        </div>
+
+        <!-- EMAIL -->
+        <div class="field">
+          <label>Email</label>
+          <input pInputText formControlName="email" />
+          <p-message 
+            *ngIf="pf['email'].touched && pf['email'].hasError('required')"
+            severity="error"
+            text="Email is required">
+          </p-message>
+          <p-message 
+            *ngIf="pf['email'].touched && pf['email'].hasError('email')"
+            severity="error"
+            text="Invalid email format">
+          </p-message>
+        </div>
+
       </div>
 
-      <div class="field">
-        <label>Email</label>
-        <input pInputText [(ngModel)]="form.email" />
-      </div>
-    </div>
-
-    <button pButton label="Save Changes" (click)="saveProfile()"></button>
+      <button 
+        pButton 
+        type="submit"
+        label="Save Changes"
+        [disabled]="profileForm.invalid">
+      </button>
+    </form>
   </div>
 
 
+  <!-- PASSWORD CARD -->
   <div class="card">
-
     <h2>Change Password</h2>
 
-    <div class="form-grid">
-      <div class="field">
-        <label>Old Password</label>
-        <input pInputText type="password" [(ngModel)]="pw.oldPassword" />
+    <form [formGroup]="passwordForm" (ngSubmit)="changePassword()">
+      <div class="form-grid">
+
+        <!-- OLD PASSWORD -->
+        <div class="field">
+          <label>Old Password</label>
+          <input pInputText type="password" formControlName="oldPassword" />
+          <p-message 
+            *ngIf="pwf['oldPassword'].touched && pwf['oldPassword'].hasError('required')"
+            severity="error"
+            text="Old password is required">
+          </p-message>
+        </div>
+
+        <!-- NEW PASSWORD -->
+        <div class="field">
+          <label>New Password</label>
+          <input pInputText type="password" formControlName="newPassword" />
+          <p-message 
+            *ngIf="pwf['newPassword'].touched && pwf['newPassword'].hasError('required')"
+            severity="error"
+            text="New password is required">
+          </p-message>
+
+          <p-message 
+            *ngIf="pwf['newPassword'].touched && pwf['newPassword'].hasError('minlength')"
+            severity="error"
+            text="Must be at least 6 characters">
+          </p-message>
+
+          <p-message 
+            *ngIf="pwf['newPassword'].touched && pwf['newPassword'].hasError('weakPassword')"
+            severity="error"
+            text="Password must include uppercase, lowercase, number, and symbol">
+          </p-message>
+        </div>
+
+        <!-- CONFIRM PASSWORD -->
+        <div class="field">
+          <label>Confirm New Password</label>
+          <input pInputText type="password" formControlName="confirmPassword" />
+          <p-message 
+            *ngIf="pwf['confirmPassword'].touched && pwf['confirmPassword'].hasError('required')"
+            severity="error"
+            text="Please confirm your password">
+          </p-message>
+
+          <p-message 
+            *ngIf="passwordForm.hasError('mismatch') && pwf['confirmPassword'].touched"
+            severity="error"
+            text="Passwords do not match">
+          </p-message>
+        </div>
+
       </div>
 
-      <div class="field">
-        <label>New Password</label>
-        <input pInputText type="password" [(ngModel)]="pw.newPassword" />
-      </div>
-
-      <div class="field">
-        <label>Confirm New Password</label>
-        <input pInputText type="password" [(ngModel)]="pw.confirmPassword" />
-      </div>
-    </div>
-
-    <button pButton label="Change Password" (click)="changePassword()"></button>
+      <button 
+        pButton 
+        type="submit"
+        label="Change Password"
+        [disabled]="passwordForm.invalid">
+      </button>
+    </form>
   </div>
 
 </div>
