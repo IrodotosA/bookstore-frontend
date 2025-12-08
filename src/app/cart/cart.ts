@@ -2,17 +2,27 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { InputNumberModule } from 'primeng/inputnumber';
-import { CartService } from '../services/cart.service';
 import { FormsModule } from '@angular/forms';
-import { RouterModule, Router  } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { DialogModule } from 'primeng/dialog';
+
+import { CartService } from '../services/cart.service';
 import { AuthService } from '../auth/auth.service';
 import { environment } from '../../environments/environment';
+
+import { CartItem } from '../models/cart-item.model';
 
 @Component({
   selector: 'app-cart',
   standalone: true,
-  imports: [CommonModule, ButtonModule, InputNumberModule, FormsModule, RouterModule, DialogModule],
+  imports: [
+    CommonModule,
+    ButtonModule,
+    InputNumberModule,
+    FormsModule,
+    RouterModule,
+    DialogModule
+  ],
   templateUrl: './cart.html',
   styleUrl: './cart.scss'
 })
@@ -20,6 +30,7 @@ export class Cart {
   cart = inject(CartService);
   auth = inject(AuthService);
   router = inject(Router);
+
   showLoginDialog = false;
   apiUrl = environment.apiUrl;
 
@@ -31,31 +42,33 @@ export class Cart {
     }
   }
 
-  increaseQty(item: any) {
-    item.quantity = item.quantity + 1;
-    this.cart.updateQuantity(item._id, item.quantity);
+  increaseQty(item: CartItem) {
+    const newQty = item.quantity + 1;
+    item.quantity = newQty;
+    this.cart.updateQuantity(item._id, newQty);
   }
 
-  decreaseQty(item: any) {
-    item.quantity = Math.max(1, item.quantity - 1);
-    this.cart.updateQuantity(item._id, item.quantity);
+  decreaseQty(item: CartItem) {
+    const newQty = Math.max(1, item.quantity - 1);
+    item.quantity = newQty;
+    this.cart.updateQuantity(item._id, newQty);
   }
 
-  manualQtyChange(item: any) {
-    // Called when typing in the input box
-    item.quantity = Math.max(1, item.quantity);
-    this.cart.updateQuantity(item._id, item.quantity);
+  manualQtyChange(item: CartItem) {
+    const newQty = Math.max(1, item.quantity);
+    item.quantity = newQty;
+    this.cart.updateQuantity(item._id, newQty);
   }
 
   removeItem(id: string) {
     this.cart.removeFromCart(id);
   }
 
-  get items() {
+  get items(): CartItem[] {
     return this.cart.cartItems;
   }
 
-  get totalPrice() {
+  get totalPrice(): number {
     return this.cart.getTotalPrice();
   }
 

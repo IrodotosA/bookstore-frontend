@@ -3,6 +3,9 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
+import { Order } from '../models/order.model';
+import { CreateOrderDto } from '../models/create-order.dto';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -11,63 +14,62 @@ export class OrderService {
 
   constructor(private http: HttpClient) {}
 
-  createOrder(orderData: any): Observable<any> {
-    const token = localStorage.getItem('token');
-
-    return this.http.post(this.apiUrl, orderData, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
+  // Helper for token headers
+  private getAuthHeaders(): HttpHeaders {
+    const token = localStorage.getItem('token') ?? '';
+    return new HttpHeaders({
+      Authorization: `Bearer ${token}`
     });
   }
 
-  getMyOrders() {
-    const token = localStorage.getItem('token');
-
-    return this.http.get<any[]>(this.apiUrl + '/my', {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
+  // -------------------------------------------------------
+  // CREATE ORDER (Public checkout)
+  // -------------------------------------------------------
+  createOrder(orderData: CreateOrderDto): Observable<Order> {
+    return this.http.post<Order>(this.apiUrl, orderData, {
+      headers: this.getAuthHeaders()
     });
   }
 
-  cancelOrder(orderId: string) {
-    const token = localStorage.getItem('token');
-
-    return this.http.put(
-      `${this.apiUrl}/cancel/${orderId}`,
-      {},
-      {
-        headers: { Authorization: `Bearer ${token}` }
-      }
-    );
-  }
-
-  getAllOrders() {
-    const token = localStorage.getItem('token');
-    return this.http.get<any[]>(this.apiUrl, {
-      headers: { Authorization: `Bearer ${token}` }
+  // -------------------------------------------------------
+  // USER'S OWN ORDERS
+  // -------------------------------------------------------
+  getMyOrders(): Observable<Order[]> {
+    return this.http.get<Order[]>(`${this.apiUrl}/my`, {
+      headers: this.getAuthHeaders()
     });
   }
 
-  updateOrderStatus(id: string, status: string) {
-    const token = localStorage.getItem('token');
-    return this.http.put(`${this.apiUrl}/${id}`, { status }, {
-      headers: { Authorization: `Bearer ${token}` }
+  cancelOrder(orderId: string): Observable<Order> {
+    return this.http.put<Order>(`${this.apiUrl}/cancel/${orderId}`, {}, {
+      headers: this.getAuthHeaders()
     });
   }
 
-  updateOrderFull(id: string, payload: any) {
-    const token = localStorage.getItem('token');
-    return this.http.put<any>(`${this.apiUrl}/${id}`, payload, {
-      headers: { Authorization: `Bearer ${token}` }
+  // -------------------------------------------------------
+  // ADMIN ROUTES
+  // -------------------------------------------------------
+  getAllOrders(): Observable<Order[]> {
+    return this.http.get<Order[]>(this.apiUrl, {
+      headers: this.getAuthHeaders()
     });
   }
 
-  deleteOrder(id: string) {
-    const token = localStorage.getItem('token');
-    return this.http.delete(`${this.apiUrl}/${id}`, {
-      headers: { Authorization: `Bearer ${token}` }
+  updateOrderStatus(id: string, status: Order['status']): Observable<Order> {
+    return this.http.put<Order>(`${this.apiUrl}/${id}`, { status }, {
+      headers: this.getAuthHeaders()
+    });
+  }
+
+  updateOrderFull(id: string, payload: Partial<Order>): Observable<Order> {
+    return this.http.put<Order>(`${this.apiUrl}/${id}`, payload, {
+      headers: this.getAuthHeaders()
+    });
+  }
+
+  deleteOrder(id: string): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(`${this.apiUrl}/${id}`, {
+      headers: this.getAuthHeaders()
     });
   }
 }

@@ -17,14 +17,15 @@ import {
 } from '@angular/forms';
 import { BookService } from '../../services/book.service';
 import { environment } from '../../../environments/environment';
+import { Book } from '../../models/book.model';
 
 @Component({
   selector: 'app-admin-books',
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule,          // kept for searchTerm + toggleButton ngModel
-    ReactiveFormsModule,  // added for reactive form in dialog
+    FormsModule,
+    ReactiveFormsModule,
     TableModule,
     ButtonModule,
     ToggleButtonModule,
@@ -43,20 +44,23 @@ export class AdminBooks implements OnInit {
   private fb = inject(FormBuilder);
 
   apiUrl = environment.apiUrl;
-  books: any[] = [];
+
+  books: Book[] = [];
+  filteredBooks: Book[] = [];
+
   loading = true;
   selectedFile: File | null = null;
   previewImage: string | null = null;
-  expandedRows: { [key: string]: boolean } = {};
+
+  expandedRows: Record<string, boolean> = {};
   searchTerm: string = '';
-  filteredBooks: any[] = [];
 
   // Dialog state
   bookDialog = false;
   isEditMode = false;
-  selectedBook: any | null = null;
+  selectedBook: Book | null = null;
 
-  // ✅ Reactive form for book create/edit
+  // Reactive form for book create/edit
   bookForm!: FormGroup;
 
   ngOnInit() {
@@ -80,7 +84,7 @@ export class AdminBooks implements OnInit {
   loadBooks() {
     this.loading = true;
     this.bookService.getAllBooks().subscribe({
-      next: (data) => {
+      next: (data: Book[]) => {
         this.books = data;
         this.filteredBooks = data;
         this.loading = false;
@@ -96,23 +100,19 @@ export class AdminBooks implements OnInit {
     this.selectedFile = null;
     this.previewImage = null;
 
-    // Clear the file input element if it exists
-    const fileInput = document.getElementById('book-image-input') as HTMLInputElement;
+    const fileInput = document.getElementById('book-image-input') as HTMLInputElement | null;
     if (fileInput) fileInput.value = '';
   }
 
   filterBooks() {
     const term = this.searchTerm.toLowerCase().trim();
 
-    this.filteredBooks = this.books.filter((b) => {
-      const titleMatch = b.title?.toLowerCase().includes(term);
-      const authorMatch = b.author?.toLowerCase().includes(term);
-      const categoryMatch = b.category?.toLowerCase().includes(term);
+    this.filteredBooks = this.books.filter((b) =>
+      b.title?.toLowerCase().includes(term) ||
+      b.author?.toLowerCase().includes(term) ||
+      b.category?.toLowerCase().includes(term)
+    );
 
-      return titleMatch || authorMatch || categoryMatch;
-    });
-
-    // Reset expanded rows after filtering
     this.expandedRows = {};
   }
 
@@ -120,18 +120,18 @@ export class AdminBooks implements OnInit {
     this.expandedRows = this.books.reduce((acc, book) => {
       acc[book._id] = true;
       return acc;
-    }, {} as { [key: string]: boolean });
+    }, {} as Record<string, boolean>);
   }
 
   collapseAll() {
     this.expandedRows = {};
   }
 
-  onRowExpand(event: any) {
+  onRowExpand(event: { data: Book }) {
     console.log('Expanded:', event.data);
   }
 
-  onRowCollapse(event: any) {
+  onRowCollapse(event: { data: Book }) {
     console.log('Collapsed:', event.data);
   }
 
@@ -139,7 +139,6 @@ export class AdminBooks implements OnInit {
     this.isEditMode = false;
     this.selectedBook = null;
 
-    // reset reactive form
     this.bookForm.reset({
       title: '',
       author: '',
@@ -152,7 +151,7 @@ export class AdminBooks implements OnInit {
     this.bookDialog = true;
   }
 
-  editBook(book: any) {
+  editBook(book: Book) {
     this.isEditMode = true;
     this.selectedBook = book;
 
@@ -168,22 +167,22 @@ export class AdminBooks implements OnInit {
     this.bookDialog = true;
   }
 
-  onImageSelect(event: any) {
-    const file = event.target.files?.[0];
+  onImageSelect(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
     if (!file) return;
 
     this.selectedFile = file;
 
-    // Live preview
     const reader = new FileReader();
     reader.onload = () => (this.previewImage = reader.result as string);
     reader.readAsDataURL(file);
   }
 
-  toggleFeatured(book: any) {
+  toggleFeatured(book: Book) {
     this.bookService.updateFeatured(book._id, !book.featured).subscribe({
-      next: (updated) => {
-        book.featured = updated.featured; // Update instantly in table
+      next: (updated: Book) => {
+        book.featured = updated.featured;
       },
       error: (err) => {
         console.error(err);
@@ -192,7 +191,7 @@ export class AdminBooks implements OnInit {
     });
   }
 
-  deleteBook(book: any) {
+  deleteBook(book: Book) {
     if (!confirm(`Delete book "${book.title}"?`)) return;
 
     this.bookService.deleteBook(book._id).subscribe({
@@ -215,55 +214,45 @@ export class AdminBooks implements OnInit {
     }
 
     const { title, author, category, price, description } = this.bookForm.value;
-
-    // --- Build FormData for file upload + text fields ---
     const fd = new FormData();
 
     fd.append('title', title || '');
     fd.append('author', author || '');
     fd.append('category', category || '');
     fd.append('description', description || '');
-    fd.append('price', (price ?? 0).toString());
+    fd.append('price', String(price ?? 0));
 
-    // Only append image if user selected one
     if (this.selectedFile) {
       fd.append('image', this.selectedFile);
     }
 
-    // ------------ UPDATE MODE ------------
+    // UPDATE
     if (this.isEditMode && this.selectedBook) {
       this.bookService.updateBook(this.selectedBook._id, fd).subscribe({
-        next: (updated) => {
-          const idx = this.books.findIndex((b) => b._id === this.selectedBook!._id);
+        next: (updated: Book) => {
+          const idx = this.books.findIndex(b => b._id === this.selectedBook!._id);
           if (idx !== -1) this.books[idx] = updated;
 
           this.resetFormState();
           this.bookForm.reset();
           this.bookDialog = false;
-          this.selectedFile = null;
         },
-        error: (err) => {
-          console.error(err);
-          alert('Failed to update book');
-        }
+        error: () => alert('Failed to update book')
       });
     }
-    // ------------ CREATE MODE ------------
+
+    // CREATE
     else {
       this.bookService.createBook(fd).subscribe({
-        next: (created) => {
+        next: (created: Book) => {
           this.books.unshift(created);
           this.filteredBooks = [...this.books];
 
           this.resetFormState();
           this.bookForm.reset();
           this.bookDialog = false;
-          this.selectedFile = null;
         },
-        error: (err) => {
-          console.error(err);
-          alert('Failed to create book');
-        }
+        error: () => alert('Failed to create book')
       });
     }
   }
@@ -276,7 +265,6 @@ export class AdminBooks implements OnInit {
     this.selectedBook = null;
   }
 
-  // Optional: helpers for template validation if you want to show errors
   get f() {
     return this.bookForm.controls;
   }

@@ -25,8 +25,10 @@ import {
   ValidationErrors
 } from '@angular/forms';
 
-import { FormsModule } from '@angular/forms'; // kept only for search bar
+import { FormsModule } from '@angular/forms';
+
 import { OrderService } from '../../services/order.service';
+import { Order, OrderItem, OrderStatus, PaymentMethod } from '../../models/order.model';
 
 @Component({
   selector: 'app-admin-orders',
@@ -41,35 +43,37 @@ import { OrderService } from '../../services/order.service';
     InputTextModule,
     DialogModule,
     MessageModule,
-    ReactiveFormsModule, // FULL REACTIVE FORM
-    FormsModule // kept for search bar only
+    ReactiveFormsModule,
+    FormsModule
   ],
   templateUrl: './orders.html',
   styleUrl: './orders.scss'
 })
 export class AdminOrders implements OnInit {
+
   private fb = inject(FormBuilder);
   private orderService = inject(OrderService);
 
-  selectedOrder: any | null = null;
-  orders: any[] = [];
+  selectedOrder: Order | null = null;
+  orders: Order[] = [];
+  filteredOrders: Order[] = [];
+
   loading = true;
   searchTerm: string = '';
-  filteredOrders: any[] = [];
 
-  expandedRows: { [key: string]: boolean } = {};
+  expandedRows: Record<string, boolean> = {};
   orderDialog = false;
 
-  // ⭐ FULL REACTIVE ORDER FORM
+  // REACTIVE FORM
   orderForm!: FormGroup;
 
-  paymentMethods = [
+  paymentMethods: { label: string; value: PaymentMethod }[] = [
     { label: 'Credit Card', value: 'card' },
     { label: 'Cash on Delivery', value: 'cod' },
     { label: 'PayPal', value: 'paypal' }
   ];
 
-  statuses = [
+  statuses: { label: string; value: OrderStatus }[] = [
     { label: 'Pending', value: 'pending' },
     { label: 'Shipped', value: 'shipped' },
     { label: 'Completed', value: 'completed' },
@@ -82,7 +86,7 @@ export class AdminOrders implements OnInit {
   }
 
   // -----------------------------
-  // INITIAL EMPTY FORM
+  // EMPTY ORDER FORM
   // -----------------------------
   initEmptyForm() {
     this.orderForm = this.fb.group({
@@ -115,32 +119,24 @@ export class AdminOrders implements OnInit {
     return this.orderForm.get('billing') as FormGroup;
   }
 
-  // GET ARRAY ACCESSOR
   get itemsArray(): FormArray {
     return this.orderForm.get('items') as FormArray;
   }
 
-  // CREATE A NEW ITEM FORM GROUP
-  createItem(item?: any): FormGroup {
+  createItem(item?: OrderItem): FormGroup {
     return this.fb.group({
       title: [item?.title || '', Validators.required],
-      quantity: [
-        item?.quantity || 1,
-        [Validators.required, Validators.min(1)]
-      ],
-      price: [
-        item?.price || 0,
-        [Validators.required, Validators.min(0)]
-      ]
+      quantity: [item?.quantity || 1, [Validators.required, Validators.min(1)]],
+      price: [item?.price || 0, [Validators.required, Validators.min(0)]]
     });
   }
 
   // -----------------------------
-  // LOADING ORDERS
+  // LOAD ORDERS
   // -----------------------------
   loadOrders() {
     this.orderService.getAllOrders().subscribe({
-      next: (data) => {
+      next: (data: Order[]) => {
         this.orders = data;
         this.filteredOrders = data;
         this.loading = false;
@@ -155,11 +151,10 @@ export class AdminOrders implements OnInit {
   filterOrders() {
     const term = this.searchTerm.toLowerCase().trim();
 
-    this.filteredOrders = this.orders.filter((order) => {
-      const idMatch = order._id.toLowerCase().includes(term);
-      const emailMatch = order.billing?.email?.toLowerCase().includes(term);
-      return idMatch || emailMatch;
-    });
+    this.filteredOrders = this.orders.filter(order =>
+      order._id.toLowerCase().includes(term) ||
+      order.billing?.email?.toLowerCase().includes(term)
+    );
 
     this.expandedRows = {};
   }
@@ -168,7 +163,7 @@ export class AdminOrders implements OnInit {
     this.expandedRows = this.orders.reduce((acc, order) => {
       acc[order._id] = true;
       return acc;
-    }, {});
+    }, {} as Record<string, boolean>);
   }
 
   collapseAll() {
@@ -179,42 +174,38 @@ export class AdminOrders implements OnInit {
   onRowCollapse(event: TableRowCollapseEvent) {}
 
   // -----------------------------
-  // OPEN EDIT DIALOG
+  // OPEN EDIT POPUP
   // -----------------------------
-  openEdit(order: any) {
+  openEdit(order: Order) {
     this.selectedOrder = order;
 
     this.orderForm.reset();
     this.itemsArray.clear();
 
-    // PATCH BILLING
     this.orderForm.patchValue({
-      billing: order.billing || {},
-      paymentMethod: order.paymentMethod || '',
-      status: order.status || '',
-      totalPrice: order.totalPrice || 0
+      billing: order.billing,
+      paymentMethod: order.paymentMethod,
+      status: order.status,
+      totalPrice: order.totalPrice
     });
 
-    // PATCH ITEMS ARRAY
-    if (order.items && Array.isArray(order.items)) {
-      order.items.forEach((item: any) => {
-        this.itemsArray.push(this.createItem(item));
-      });
-    }
+    order.items.forEach(item => {
+      this.itemsArray.push(this.createItem(item));
+    });
 
     this.setupAutoTotalCalculation();
 
     this.orderDialog = true;
   }
 
-  //--------------------------------
-  // AUTO RE-CALCULATE TOTAL PRICE
-  //--------------------------------
+  // -----------------------------
+  // AUTO TOTAL PRICE
+  // -----------------------------
   setupAutoTotalCalculation() {
     this.itemsArray.valueChanges.subscribe(() => {
-      const total = this.itemsArray.controls.reduce((sum, group: any) => {
-        const price = group.get('price')?.value || 0;
-        const quantity = group.get('quantity')?.value || 0;
+      const total = this.itemsArray.controls.reduce((sum, ctrl) => {
+        const price = ctrl.get('price')?.value ?? 0;
+        const quantity = ctrl.get('quantity')?.value ?? 0;
         return sum + price * quantity;
       }, 0);
 
@@ -222,60 +213,49 @@ export class AdminOrders implements OnInit {
     });
   }
 
-  //--------------------------------
-  // REMOVE ITEM
-  //--------------------------------
   removeItem(index: number) {
     this.itemsArray.removeAt(index);
   }
 
-  //--------------------------------
+  // -----------------------------
   // SAVE ORDER
-  //--------------------------------
+  // -----------------------------
   saveOrder() {
     if (!this.selectedOrder) return;
 
-    const payload = this.orderForm.value;
-
     this.orderService
-      .updateOrderFull(this.selectedOrder._id, payload)
+      .updateOrderFull(this.selectedOrder._id, this.orderForm.value)
       .subscribe({
-        next: (res) => {
-          const idx = this.orders.findIndex((o) => o._id === res._id);
-          if (idx !== -1) this.orders[idx] = res;
-
+        next: (updated: Order) => {
+          const idx = this.orders.findIndex(o => o._id === updated._id);
+          if (idx !== -1) this.orders[idx] = updated;
           this.orderDialog = false;
         },
         error: (err) => console.error(err)
       });
   }
 
-  //--------------------------------
-  // CLOSE DIALOG
-  //--------------------------------
   hideDialog() {
     this.orderDialog = false;
   }
 
-  //--------------------------------
-  // TAG COLOR
-  //--------------------------------
-  getStatusSeverity(status: string) {
+  // -----------------------------
+  // STATUS COLOR
+  // -----------------------------
+  getStatusSeverity(status: OrderStatus) {
     switch (status) {
-      case 'pending':
-        return 'warn';
-      case 'shipped':
-        return 'info';
-      case 'completed':
-        return 'success';
-      case 'canceled':
-        return 'danger';
-      default:
-        return null;
+      case 'pending': return 'warn';
+      case 'shipped': return 'info';
+      case 'completed': return 'success';
+      case 'canceled': return 'danger';
+      default: return null;
     }
   }
 
-  deleteOrder(order: any) {
+  // -----------------------------
+  // DELETE ORDER
+  // -----------------------------
+  deleteOrder(order: Order) {
     if (!confirm('Delete this order?')) return;
 
     this.orderService.deleteOrder(order._id).subscribe({

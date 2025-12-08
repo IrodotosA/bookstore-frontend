@@ -1,9 +1,11 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, BehaviorSubject, of } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
+
 import { AuthService } from '../auth/auth.service';
 import { environment } from '../../environments/environment';
+import { Book } from '../models/book.model';
 
 @Injectable({
   providedIn: 'root'
@@ -21,74 +23,74 @@ export class WishlistService {
     private auth: AuthService
   ) {}
 
-  private getAuthHeaders() {
-    const token = this.auth.getToken();
-    return {
+  private getAuthHeaders(): HttpHeaders {
+    const token = this.auth.getToken() ?? '';
+    return new HttpHeaders({
       Authorization: `Bearer ${token}`
-    };
+    });
   }
 
-    loadWishlist(): Observable<string[]> {
+  // -------------------------------------------
+  // LOAD WISHLIST (returns Book[] → store IDs)
+  // -------------------------------------------
+  loadWishlist(): Observable<string[]> {
     const token = this.auth.getToken();
 
     if (!token) {
-        this.wishlistItems = [];
-        this._wishlist$.next([]);
-        return of([]);
+      this.wishlistItems = [];
+      this._wishlist$.next([]);
+      return of([]);
     }
 
-    return this.http.get<any[]>(this.apiUrl, {
-        headers: this.getAuthHeaders()
+    return this.http.get<Book[]>(this.apiUrl, {
+      headers: this.getAuthHeaders()
     }).pipe(
-        // convert array of book objects → array of IDs
-        map(items => items.map(item => item._id)),
-        tap(ids => {
+      map((books) => books.map(b => b._id)),
+      tap((ids) => {
         this.wishlistItems = ids;
         this._wishlist$.next(ids);
-        })
+      })
     );
-    }
+  }
 
   isInWishlist(bookId: string): boolean {
     return this.wishlistItems.includes(bookId);
   }
 
-    toggle(bookId: string): Observable<any> {
-        if (this.isInWishlist(bookId)) {
-            return this.remove(bookId);
-        }
+  toggle(bookId: string): Observable<unknown> {
+    return this.isInWishlist(bookId)
+      ? this.remove(bookId)
+      : this.add(bookId);
+  }
 
-        return this.add(bookId);
-    }
+  add(bookId: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(
+      `${this.apiUrl}/add`,
+      { bookId },
+      { headers: this.getAuthHeaders() }
+    ).pipe(
+      tap(() => {
+        this.wishlistItems.push(bookId);
+        this._wishlist$.next(this.wishlistItems);
+      })
+    );
+  }
 
-    add(bookId: string): Observable<any> {
-        return this.http.post<any>(
-            `${this.apiUrl}/add`,
-            { bookId },
-            { headers: this.getAuthHeaders() }
-        ).pipe(
-            tap((res) => {
-            this.wishlistItems.push(bookId);
-            this._wishlist$.next(this.wishlistItems);
-            })
-        );
-    }
+  remove(bookId: string): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(
+      `${this.apiUrl}/remove/${bookId}`,
+      { headers: this.getAuthHeaders() }
+    ).pipe(
+      tap(() => {
+        this.wishlistItems = this.wishlistItems.filter(id => id !== bookId);
+        this._wishlist$.next(this.wishlistItems);
+      })
+    );
+  }
 
-    remove(bookId: string): Observable<any> {
-        return this.http.delete<any>(
-            `${this.apiUrl}/remove/${bookId}`,
-            { headers: this.getAuthHeaders() }
-        ).pipe(
-            tap(() => {
-            this.wishlistItems = this.wishlistItems.filter(id => id !== bookId);
-            this._wishlist$.next(this.wishlistItems);
-            })
-        );
-    }
-
-    clearAll(): Observable<boolean> {
-      this.wishlistItems = [];
-      this._wishlist$.next([]);
-      return of(true);
-    }
+  clearAll(): Observable<boolean> {
+    this.wishlistItems = [];
+    this._wishlist$.next([]);
+    return of(true);
+  }
 }

@@ -8,10 +8,12 @@ import { DialogModule } from 'primeng/dialog';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { CardModule } from 'primeng/card';
 import { FormsModule } from '@angular/forms';
+
 import { environment } from '../../environments/environment';
 import { BookService } from '../services/book.service';
 import { CartService } from '../services/cart.service';
 
+import { Book } from '../models/book.model';
 
 @Component({
   selector: 'app-home',
@@ -30,34 +32,41 @@ import { CartService } from '../services/cart.service';
   styleUrl: './home.scss',
 })
 export class Home implements OnInit {
-  books: any[] = [];
-  featured: any[] = [];
-  selectedBook: any = null;
-  showDetailsDialog: boolean = false;
+
+  books: Book[] = [];
+  featured: Book[] = [];
+
+  selectedBook: Book | null = null;
+  addToCartBook: Book | null = null;
+
+  showDetailsDialog = false;
+  showAddToCartDialog = false;
+
   isMobile = false;
-  addToCartBook: any = null;
-  showAddToCartDialog: boolean = false;
-  quantity: number = 1;
-  cart = inject(CartService);
-  private bookService = inject(BookService);
+  quantity = 1;
+
   apiUrl = environment.apiUrl;
+
+  private cart = inject(CartService);
+  private bookService = inject(BookService);
 
   ngOnInit() {
     this.updateIsMobile();
 
-    window.addEventListener('resize', () => {
-      this.updateIsMobile();
-    });
+    window.addEventListener('resize', () => this.updateIsMobile());
 
+    // Newest books
     this.bookService.getNewestBooks().subscribe({
-      next: (data) => {
-        this.books = data; // 4 newest books
+      next: (data: Book[]) => {
+        this.books = data;
       }
     });
 
-    // Staff picks
+    // Featured books
     this.bookService.getFeaturedBooks().subscribe({
-      next: (data) => this.featured = data
+      next: (data: Book[]) => {
+        this.featured = data;
+      }
     });
   }
 
@@ -66,31 +75,23 @@ export class Home implements OnInit {
   }
 
   responsiveOptions = [
-    {
-      breakpoint: '768px',   // phones
-      numVisible: 1,
-      numScroll: 1
-    },
-    {
-      breakpoint: '1024px',  // tablets
-      numVisible: 2,
-      numScroll: 1
-    }
+    { breakpoint: '768px', numVisible: 1, numScroll: 1 },
+    { breakpoint: '1024px', numVisible: 2, numScroll: 1 }
   ];
 
-  openDetails(book: any) {
+  openDetails(book: Book) {
     this.selectedBook = null;
     this.addToCartBook = book;
     this.quantity = 1;
     this.showDetailsDialog = true;
 
     this.bookService.getBookById(book._id).subscribe({
-      next: (data) => (this.selectedBook = data),
+      next: (data: Book) => (this.selectedBook = data),
       error: (err) => console.error(err),
     });
   }
 
-  openAddToCart(book: any) {
+  openAddToCart(book: Book) {
     this.addToCartBook = book;
     this.quantity = 1;
     this.showAddToCartDialog = true;
@@ -106,19 +107,20 @@ export class Home implements OnInit {
 
   confirmAddToCart(event: Event) {
     event.stopPropagation();
+
+    if (!this.addToCartBook) return;
+
+    // CartService is typed: accepts book+quantity
     this.cart.addToCart(this.addToCartBook, this.quantity);
-    // close dialogs
+
     this.showAddToCartDialog = false;
     this.showDetailsDialog = false;
 
-    // reset
     this.addToCartBook = null;
     this.selectedBook = null;
   }
 
-  addToCart(book: any) {
-    this.openAddToCart(book);  // just opens the quantity dialog
+  addToCart(book: Book) {
+    this.openAddToCart(book);
   }
-
-
 }

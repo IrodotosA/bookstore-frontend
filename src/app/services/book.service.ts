@@ -1,7 +1,9 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
+
+import { Book } from '../models/book.model';
 
 @Injectable({ providedIn: 'root' })
 export class BookService {
@@ -9,60 +11,63 @@ export class BookService {
 
   constructor(private http: HttpClient) {}
 
-  getLatestBooks(limit: number): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}?limit=${limit}`);
-  }
-
-  getAllBooks() {
-    return this.http.get<any[]>(this.apiUrl);
-  }
-
-  getBookById(id: string) {
-    return this.http.get<any>(`${this.apiUrl}/${id}`);
-  }
-
-    // 🔹 Create book (admin)
-  createBook(bookData: any): Observable<any> {
-    const token = localStorage.getItem('token');
-
-    return this.http.post(this.apiUrl, bookData, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
+  // Helper for authorization headers
+  private getAuthHeaders(): HttpHeaders {
+    const token = localStorage.getItem('token') ?? '';
+    return new HttpHeaders({
+      Authorization: `Bearer ${token}`
     });
   }
 
-  // 🔹 Update book (admin)
-  updateBook(id: string, bookData: any): Observable<any> {
-    const token = localStorage.getItem('token');
+  // ----------------------------------------------------
+  // PUBLIC ROUTES
+  // ----------------------------------------------------
 
-    return this.http.put(`${this.apiUrl}/${id}`, bookData, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
+  getLatestBooks(limit: number): Observable<Book[]> {
+    return this.http.get<Book[]>(`${this.apiUrl}?limit=${limit}`);
+  }
+
+  getAllBooks(): Observable<Book[]> {
+    return this.http.get<Book[]>(this.apiUrl);
+  }
+
+  getBookById(id: string): Observable<Book> {
+    return this.http.get<Book>(`${this.apiUrl}/${id}`);
+  }
+
+  getFeaturedBooks(): Observable<Book[]> {
+    return this.http.get<Book[]>(`${this.apiUrl}/featured`);
+  }
+
+  getNewestBooks(): Observable<Book[]> {
+    return this.http.get<Book[]>(`${this.apiUrl}/newest`);
+  }
+
+  // ----------------------------------------------------
+  // ADMIN ROUTES
+  // ----------------------------------------------------
+
+  createBook(bookData: FormData): Observable<Book> {
+    return this.http.post<Book>(this.apiUrl, bookData, {
+      headers: this.getAuthHeaders()
     });
   }
 
-  getFeaturedBooks() {
-    return this.http.get<any[]>(`${this.apiUrl}/featured`);
-  }
-  
-  updateFeatured(id: string, featured: boolean) {
-    return this.http.patch<any>(`${this.apiUrl}/${id}/featured`, { featured });
+  updateBook(id: string, bookData: FormData): Observable<Book> {
+    return this.http.put<Book>(`${this.apiUrl}/${id}`, bookData, {
+      headers: this.getAuthHeaders()
+    });
   }
 
-  getNewestBooks() {
-    return this.http.get<any[]>(`${this.apiUrl}/newest`);
+  updateFeatured(id: string, featured: boolean): Observable<Book> {
+    return this.http.patch<Book>(`${this.apiUrl}/${id}/featured`, { featured }, {
+      headers: this.getAuthHeaders()
+    });
   }
 
-  // 🔹 Delete book (admin)
-  deleteBook(id: string): Observable<any> {
-    const token = localStorage.getItem('token');
-
-    return this.http.delete(`${this.apiUrl}/${id}`, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
+  deleteBook(id: string): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(`${this.apiUrl}/${id}`, {
+      headers: this.getAuthHeaders()
     });
   }
 }

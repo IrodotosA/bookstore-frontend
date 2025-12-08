@@ -18,6 +18,7 @@ import { WishlistService } from '../services/wishlist.service';
 import { AuthService } from '../auth/auth.service';
 import { environment } from '../../environments/environment';
 
+import { Book } from '../models/book.model';
 
 @Component({
   selector: 'app-shop',
@@ -40,28 +41,34 @@ import { environment } from '../../environments/environment';
   templateUrl: './shop.html',
   styleUrl: './shop.scss',
 })
-export class Shop {
+export class Shop implements OnInit {
 
   constructor(
     private bookService: BookService,
-    private cartService: CartService,
+    // private cartService: CartService,
     private wishlist: WishlistService,
     private auth: AuthService
   ) {}
 
-  books: any[] = [];
-  filteredBooks: any[] = []
-  cart = inject(CartService);
+  books: Book[] = [];
+  filteredBooks: Book[] = [];
+  visibleBooks: Book[] = [];
+
+  selectedBook: Book | null = null;
+  addToCartBook: Book | null = null;
+
+  cart = inject(CartService); // or this.cartService if preferred
+
   showFilters = false;
   loading = true;
-  searchQuery: string = '';
-  selectedBook: any = null;
-  showDetailsDialog: boolean = false;
-  quantity: number = 1;
-  showAddToCartDialog: boolean = false;
-  addToCartBook: any = null;
+
+  searchQuery = '';
+  showDetailsDialog = false;
+  quantity = 1;
+  showAddToCartDialog = false;
+
   apiUrl = environment.apiUrl;
-  visibleBooks: any[] = [];
+
   itemsPerPage = 9;
   currentIndex = 0;
 
@@ -73,59 +80,83 @@ export class Shop {
 
   selectedSort: string | null = null;
 
-  // Categories
   allCategories: string[] = [];
   selectedCategories: string[] = [];
 
-  openDetails(book: any) {
+  ngOnInit() {
+    this.bookService.getAllBooks().subscribe({
+      next: (data: Book[]) => {
+        this.books = data;
+        this.filteredBooks = [...data];
+        this.allCategories = Array.from(new Set(data.map(b => b.category))).sort();
+        this.resetVisibleBooks();
+        this.loading = false;
+      },
+      error: () => this.loading = false
+    });
+  }
+
+  openDetails(book: Book) {
     this.selectedBook = null;
     this.addToCartBook = book;
     this.quantity = 1;
     this.showDetailsDialog = true;
 
     this.bookService.getBookById(book._id).subscribe({
-      next: (data) => (this.selectedBook = data),
+      next: (data: Book) => (this.selectedBook = data),
       error: (err) => console.error(err),
     });
   }
 
-  confirmAddToCart(event: Event) {
-    event.stopPropagation();
-    this.cart.addToCart(this.addToCartBook, this.quantity);
-    // close dialogs
-    this.showAddToCartDialog = false;
-    this.showDetailsDialog = false;
-
-    // reset
-    this.addToCartBook = null;
-    this.selectedBook = null;
-  }
-
-  openAddToCart(book: any) {
+  openAddToCart(book: Book) {
     this.addToCartBook = book;
     this.quantity = 1;
     this.showAddToCartDialog = true;
   }
 
+  confirmAddToCart(event: Event) {
+    event.stopPropagation();
+    if (this.addToCartBook) {
+      this.cart.addToCart(this.addToCartBook, this.quantity);
+    }
+    this.showAddToCartDialog = false;
+    this.showDetailsDialog = false;
+
+    this.addToCartBook = null;
+    this.selectedBook = null;
+  }
+
   increaseQuantity() {
-    this.quantity = this.quantity + 1;
+    this.quantity++;
   }
 
   decreaseQuantity() {
     this.quantity = Math.max(1, this.quantity - 1);
   }
 
+  toggleWishlist(book: Book) {
+    if (!this.auth.isLoggedIn()) return;
+
+    this.wishlist.toggle(book._id).subscribe({
+      error: console.error
+    });
+  }
+
+  isInWishlist(bookId: string): boolean {
+    return this.wishlist.wishlistItems.includes(bookId);
+  }
+
   applyFilters() {
     let result = [...this.books];
 
-    if (this.searchQuery.trim() !== '') {
-      const q = this.searchQuery.toLowerCase();
+    const q = this.searchQuery.trim().toLowerCase();
 
+    if (q !== '') {
       result = result.filter(book =>
         book.title.toLowerCase().includes(q) ||
         book.author.toLowerCase().includes(q) ||
         book.category.toLowerCase().includes(q) ||
-        book.description.toLowerCase().includes(q)
+        (book.description ?? '').toLowerCase().includes(q)
       );
     }
 
@@ -139,15 +170,12 @@ export class Shop {
     if (this.selectedSort === 'priceDesc') result.sort((a, b) => b.price - a.price);
     if (this.selectedSort === 'newest') {
       result.sort((a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        new Date(b.createdAt ?? '').getTime() - new Date(a.createdAt ?? '').getTime()
       );
     }
 
     this.filteredBooks = result;
-
-    // VERY IMPORTANT
     this.resetVisibleBooks();
-
     this.showFilters = false;
   }
 
@@ -155,23 +183,8 @@ export class Shop {
     this.selectedCategories = [];
     this.selectedSort = null;
     this.filteredBooks = [...this.books];
+    this.resetVisibleBooks();
     this.showFilters = false;
-  }
-
-  toggleWishlist(book: any) {
-    if (!this.auth.isLoggedIn()) {
-      // optional: open login dialog
-      return;
-    }
-
-    this.wishlist.toggle(book._id).subscribe({
-      next: () => {},
-      error: (err) => console.error(err),
-    });
-  }
-
-  isInWishlist(bookId: string): boolean {
-    return this.wishlist.wishlistItems.includes(bookId);
   }
 
   resetVisibleBooks() {
@@ -185,23 +198,5 @@ export class Shop {
 
     this.visibleBooks = [...this.visibleBooks, ...nextChunk];
     this.currentIndex = nextIndex;
-  }
-
-  ngOnInit() {
-    this.bookService.getAllBooks().subscribe({
-      next: (data) => {
-        this.books = data;
-        this.filteredBooks = [...data];
-        this.allCategories = Array
-          .from(new Set(data.map(b => b.category)))
-          .sort();
-        this.resetVisibleBooks();
-        this.loading = false;
-      },
-      error: (err) => {
-        console.error(err);
-        this.loading = false;
-      }
-    });
   }
 }

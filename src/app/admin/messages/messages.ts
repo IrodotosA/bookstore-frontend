@@ -6,6 +6,7 @@ import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { FormsModule } from '@angular/forms';
 import { ContactService } from '../../services/contact.service';
+import { Message } from '../../models/message.model';
 
 @Component({
   selector: 'app-admin-messages',
@@ -26,9 +27,9 @@ export class AdminMessages implements OnInit {
 
   private contactService = inject(ContactService);
 
-  messages: any[] = [];
-  filteredMessages: any[] = [];
-  expandedRows: { [key: string]: boolean } = {};
+  messages: Message[] = [];
+  filteredMessages: Message[] = [];
+  expandedRows: Record<string, boolean> = {};
   searchTerm = '';
   loading = true;
 
@@ -40,7 +41,7 @@ export class AdminMessages implements OnInit {
     this.loading = true;
 
     this.contactService.getMessages().subscribe({
-      next: (data) => {
+      next: (data: Message[]) => {
         this.messages = data;
         this.filteredMessages = data;
         this.loading = false;
@@ -56,9 +57,9 @@ export class AdminMessages implements OnInit {
     const term = this.searchTerm.trim().toLowerCase();
 
     this.filteredMessages = this.messages.filter(msg =>
-      msg.name.toLowerCase().includes(term) ||
-      msg.email.toLowerCase().includes(term) ||
-      msg.subject.toLowerCase().includes(term)
+      msg.name?.toLowerCase().includes(term) ||
+      msg.email?.toLowerCase().includes(term) ||
+      msg.subject?.toLowerCase().includes(term)
     );
 
     this.expandedRows = {};
@@ -68,14 +69,14 @@ export class AdminMessages implements OnInit {
     this.expandedRows = this.messages.reduce((acc, msg) => {
       acc[msg._id] = true;
       return acc;
-    }, {} as { [key: string]: boolean });
+    }, {} as Record<string, boolean>);
   }
 
   collapseAll() {
     this.expandedRows = {};
   }
 
-  deleteMessage(msg: any) {
+  deleteMessage(msg: Message) {
     if (!confirm(`Delete message from "${msg.name}"?`)) return;
 
     this.contactService.deleteMessage(msg._id).subscribe({

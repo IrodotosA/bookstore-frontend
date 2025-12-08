@@ -1,19 +1,17 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
-interface LoginResponse {
-  token: string;
-  message?: string;
-}
+import { LoginResponse } from '../models/login-response.model';
+import { RegisterResponse } from '../models/register-response.model';
+import { User } from '../models/user.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  // adjust if your backend port/path is different
+
   private apiUrl = environment.apiUrl;
 
   private authState = new BehaviorSubject<boolean>(this.isLoggedIn());
@@ -21,10 +19,23 @@ export class AuthService {
 
   constructor(private http: HttpClient) {}
 
+  // -----------------------------------------------------
+  // LOGIN (token only)
+  // -----------------------------------------------------
   login(credentials: { email: string; password: string }): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.apiUrl}/auth/login`, credentials);
   }
 
+  // -----------------------------------------------------
+  // REGISTER (token only)
+  // -----------------------------------------------------
+  register(data: { name: string; email: string; password: string }): Observable<RegisterResponse> {
+    return this.http.post<RegisterResponse>(`${this.apiUrl}/auth/register`, data);
+  }
+
+  // -----------------------------------------------------
+  // TOKEN MANAGEMENT
+  // -----------------------------------------------------
   saveToken(token: string) {
     localStorage.setItem('token', token);
     this.authState.next(true);
@@ -34,6 +45,24 @@ export class AuthService {
     return localStorage.getItem('token');
   }
 
+  // -----------------------------------------------------
+  // EXTRACT USER FROM JWT PAYLOAD
+  // -----------------------------------------------------
+  getUser(): User | null {
+    const token = this.getToken();
+    if (!token) return null;
+
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload as User;
+    } catch {
+      return null;
+    }
+  }
+
+  // -----------------------------------------------------
+  // AUTH HELPERS
+  // -----------------------------------------------------
   isLoggedIn(): boolean {
     return !!localStorage.getItem('token');
   }
@@ -43,23 +72,8 @@ export class AuthService {
     this.authState.next(false);
   }
 
-  register(data: { name: string; email: string; password: string }) {
-    return this.http.post<any>(`${this.apiUrl}/auth/register`, data);
-  }
-
-  getUser() {
-    const token = this.getToken();
-    if (!token) return null;
-
-    try {
-      return JSON.parse(atob(token.split('.')[1])); // decode payload
-    } catch {
-      return null;
-    }
-  }
-
   isAdmin(): boolean {
     const user = this.getUser();
-    return user && user.role === 'admin';
+    return user?.role === 'admin';
   }
 }

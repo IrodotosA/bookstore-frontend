@@ -2,6 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { MenuModule } from 'primeng/menu';
+import { MenuItem } from 'primeng/api';
 import { RouterModule, RouterLink, RouterLinkActive, Router  } from '@angular/router';
 import { AuthService } from '../../auth/auth.service';
 import { CartService } from '../../services/cart.service';
@@ -18,12 +19,12 @@ export class Navbar implements OnInit {
   cart = inject(CartService);
   router = inject(Router);
   isScrolled = false;
-  items: any[] = [];
+  items: MenuItem[] = [];
 
   constructor() {
     window.addEventListener('scroll', () => {
       this.isScrolled = window.scrollY > 50;
-      const menuEl: any = document.querySelector('.p-menu-overlay');
+      const menuEl = document.querySelector('.p-menu-overlay') as HTMLElement | null;
       if (menuEl) {
         menuEl.style.display = 'none';
       }

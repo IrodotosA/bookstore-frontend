@@ -6,6 +6,12 @@ import { CardModule } from 'primeng/card';
 import { ChartModule } from 'primeng/chart';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 
+import {
+  DashboardResponse,
+  OrdersByStatus,
+  OrderStatusEntry
+} from '../../models/dashboard.model';
+
 @Component({
   selector: 'app-admin-home',
   standalone: true,
@@ -29,19 +35,26 @@ export class HomeAdmin implements OnInit {
   totalBooks = 0;
 
   labels: string[] = [];
-  chartData: any;
+  chartData!: {
+    labels: string[];
+    datasets: {
+      label: string;
+      data: number[];
+      borderColor: string;
+      backgroundColor: string;
+      fill: boolean;
+      tension: number;
+    }[];
+  };
+
   chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: {
-        position: 'top'
-      }
+      legend: { position: 'top' }
     },
     scales: {
-      x: {
-        ticks: { maxRotation: 90, minRotation: 45 }
-      }
+      x: { ticks: { maxRotation: 90, minRotation: 45 } }
     }
   };
 
@@ -53,7 +66,7 @@ export class HomeAdmin implements OnInit {
   }
 
   loadDashboard() {
-    this.http.get<any>(`${environment.apiUrl}/api/admin/dashboard`)
+    this.http.get<DashboardResponse>(`${environment.apiUrl}/api/admin/dashboard`)
       .subscribe({
         next: (data) => {
           this.totalRevenue = data.totalRevenueLast30Days;
@@ -62,7 +75,8 @@ export class HomeAdmin implements OnInit {
           this.totalUsers = data.totalUsers;
           this.totalBooks = data.totalBooks;
 
-          const statuses = ['pending', 'shipped', 'completed', 'canceled'];
+          const statuses: string[] = ['pending', 'shipped', 'completed', 'canceled'];
+
 
           const datasets = statuses.map(status => {
             const values = this.mapStatusDataToArray(
@@ -82,7 +96,7 @@ export class HomeAdmin implements OnInit {
 
           this.chartData = {
             labels: this.labels,
-            datasets: datasets
+            datasets
           };
 
           this.loading = false;
@@ -105,25 +119,24 @@ export class HomeAdmin implements OnInit {
       const y = d.getFullYear();
       const m = String(d.getMonth() + 1).padStart(2, '0');
       const da = String(d.getDate()).padStart(2, '0');
+
       list.push(`${y}-${m}-${da}`);
     }
 
     return list;
   }
 
-  mapStatusDataToArray(statusData: any[], labels: string[]) {
+  mapStatusDataToArray(statusData: OrderStatusEntry[], labels: string[]): number[] {
     const lookup = new Map<string, number>();
 
-    if (Array.isArray(statusData)) {
-      statusData.forEach(entry => {
-        lookup.set(entry.date, entry.count);
-      });
-    }
+    statusData.forEach(entry => {
+      lookup.set(entry.date, entry.count);
+    });
 
     return labels.map(date => lookup.get(date) ?? 0);
   }
 
-  mapStatusColor(status: string) {
+  mapStatusColor(status: string): string {
     switch (status) {
       case 'pending': return '#fbc02d';
       case 'shipped': return '#29b6f6';

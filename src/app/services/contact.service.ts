@@ -1,7 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { environment } from '../../environments/environment';
+import { Observable } from 'rxjs';
 
+import { environment } from '../../environments/environment';
+import { Message } from '../models/message.model'; 
 
 @Injectable({ providedIn: 'root' })
 export class ContactService {
@@ -9,15 +11,24 @@ export class ContactService {
 
   constructor(private http: HttpClient) {}
 
-  sendMessage(data: any) {
-    return this.http.post(this.apiUrl, data);
+  // -----------------------------------------------------
+  // PUBLIC: Send a message
+  // -----------------------------------------------------
+  sendMessage(data: Omit<Message, '_id' | 'createdAt'>): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(this.apiUrl, data);
   }
 
-  getMessages() {
-    return this.http.get<any[]>(this.apiUrl);
+  // -----------------------------------------------------
+  // ADMIN: Get all contact messages
+  // -----------------------------------------------------
+  getMessages(): Observable<Message[]> {
+    return this.http.get<Message[]>(this.apiUrl);
   }
 
-  deleteMessage(id: string) {
-    return this.http.delete(`${this.apiUrl}/${id}`);
+  // -----------------------------------------------------
+  // ADMIN: Delete message
+  // -----------------------------------------------------
+  deleteMessage(id: string): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(`${this.apiUrl}/${id}`);
   }
 }

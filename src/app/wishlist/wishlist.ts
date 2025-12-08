@@ -14,6 +14,8 @@ import { InputIconModule } from 'primeng/inputicon';
 import { FormsModule } from '@angular/forms';
 import { environment } from '../../environments/environment';
 
+import { Book } from '../models/book.model';
+
 @Component({
   selector: 'app-wishlist',
   standalone: true,
@@ -38,21 +40,21 @@ export class Wishlist implements OnInit {
   bookService = inject(BookService);
   cart = inject(CartService);
   router = inject(Router);
+
   apiUrl = environment.apiUrl;
-  books: any[] = [];
+
+  books: Book[] = [];
+  filteredBooks: Book[] = [];
   loading = true;
 
-  // Dialog-related variables
-  selectedBook: any = null;
-  showDetailsDialog: boolean = false;
+  selectedBook: Book | null = null;
+  showDetailsDialog = false;
 
-  addToCartBook: any = null;
-  showAddToCartDialog: boolean = false;
+  addToCartBook: Book | null = null;
+  showAddToCartDialog = false;
 
   quantity = 1;
-
-  searchQuery: string = '';
-  filteredBooks: any[] = [];
+  searchQuery = '';
 
   ngOnInit() {
     this.wishlist.wishlist$.subscribe(ids => {
@@ -64,12 +66,12 @@ export class Wishlist implements OnInit {
       }
 
       this.bookService.getAllBooks().subscribe({
-        next: allBooks => {
+        next: (allBooks: Book[]) => {
           this.books = allBooks.filter(b => ids.includes(b._id));
-          this.filteredBooks = [...this.books];  // default
+          this.filteredBooks = [...this.books];
           this.loading = false;
         },
-        error: () => this.loading = false
+        error: () => (this.loading = false)
       });
     });
   }
@@ -84,7 +86,7 @@ export class Wishlist implements OnInit {
   applySearch() {
     const q = this.searchQuery.toLowerCase().trim();
 
-    if (q === '') {
+    if (!q) {
       this.filteredBooks = [...this.books];
       return;
     }
@@ -96,21 +98,19 @@ export class Wishlist implements OnInit {
     );
   }
 
-  // DETAILS DIALOG
-  openDetails(book: any) {
+  openDetails(book: Book) {
     this.selectedBook = null;
     this.addToCartBook = book;
     this.quantity = 1;
     this.showDetailsDialog = true;
 
     this.bookService.getBookById(book._id).subscribe({
-      next: (data) => (this.selectedBook = data),
-      error: (err) => console.error(err),
+      next: (data: Book) => (this.selectedBook = data),
+      error: err => console.error(err)
     });
   }
 
-  // ADD TO CART DIALOG
-  openAddToCart(book: any) {
+  openAddToCart(book: Book) {
     this.addToCartBook = book;
     this.quantity = 1;
     this.showAddToCartDialog = true;
@@ -118,30 +118,30 @@ export class Wishlist implements OnInit {
 
   confirmAddToCart(event: Event) {
     event.stopPropagation();
-    this.cart.addToCart(this.addToCartBook, this.quantity);
-    // close dialogs
+
+    if (this.addToCartBook) {
+      this.cart.addToCart(this.addToCartBook, this.quantity);
+    }
+
     this.showAddToCartDialog = false;
     this.showDetailsDialog = false;
-
-    // reset
     this.addToCartBook = null;
     this.selectedBook = null;
   }
 
-
   increaseQuantity() {
-    this.quantity = this.quantity + 1;
+    this.quantity++;
   }
 
   decreaseQuantity() {
     this.quantity = Math.max(1, this.quantity - 1);
   }
 
-  remove(book: any) {
+  remove(book: Book) {
     this.wishlist.remove(book._id).subscribe();
   }
 
-  toggleWishlist(book: any) {
+  toggleWishlist(book: Book) {
     this.wishlist.toggle(book._id).subscribe();
   }
 

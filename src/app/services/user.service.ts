@@ -1,41 +1,71 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { AuthResponse } from '../models/auth-response.model';
+import { User, UserRole } from '../models/user.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
+
   private apiUrl = `${environment.apiUrl}/users`;
 
   constructor(private http: HttpClient) {}
 
-  getAllUsers() {
-    const token = localStorage.getItem('token');
-    return this.http.get<any[]>(this.apiUrl, {
-      headers: { Authorization: `Bearer ${token}` }
+  // Helper for token headers
+  private getAuthHeaders(): HttpHeaders {
+    const token = localStorage.getItem('token') ?? '';
+    return new HttpHeaders({
+      Authorization: `Bearer ${token}`
     });
   }
 
-  updateUser(id: string, data: any) {
-    const token = localStorage.getItem('token');
-    return this.http.put(`${this.apiUrl}/${id}`, data, {
-      headers: { Authorization: `Bearer ${token}` }
+  // ---------------------------------------
+  // GET ALL USERS
+  // ---------------------------------------
+  getAllUsers(): Observable<User[]> {
+    return this.http.get<User[]>(this.apiUrl, {
+      headers: this.getAuthHeaders()
     });
   }
 
-  deleteUser(id: string) {
-    const token = localStorage.getItem('token');
-    return this.http.delete(`${this.apiUrl}/${id}`, {
-      headers: { Authorization: `Bearer ${token}` }
+  // ---------------------------------------
+  // UPDATE USER (Admin updating another user)
+  // ---------------------------------------
+  updateUser(id: string, data: Partial<User>): Observable<User> {
+    return this.http.put<User>(`${this.apiUrl}/${id}`, data, {
+      headers: this.getAuthHeaders()
     });
   }
 
-  updateMyProfile(data: any) {
-    return this.http.put<any>(`${this.apiUrl}/me`, data);
+  // ---------------------------------------
+  // DELETE USER
+  // ---------------------------------------
+  deleteUser(id: string): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(`${this.apiUrl}/${id}`, {
+      headers: this.getAuthHeaders()
+    });
   }
 
-  changePassword(data: { oldPassword: string; newPassword: string }) {
-    return this.http.put<any>(`${this.apiUrl}/change-password`, data);
+  // ---------------------------------------
+  // USER UPDATES HIS OWN PROFILE
+  // ---------------------------------------
+  updateMyProfile(data: Partial<User>): Observable<AuthResponse> {
+    return this.http.put<AuthResponse>(`${this.apiUrl}/me`, data, {
+      headers: this.getAuthHeaders()
+    });
+  }
+
+  // ---------------------------------------
+  // CHANGE PASSWORD
+  // ---------------------------------------
+  changePassword(data: { oldPassword: string; newPassword: string }): Observable<{ message: string }> {
+    return this.http.put<{ message: string }>(
+      `${this.apiUrl}/change-password`,
+      data,
+      { headers: this.getAuthHeaders() }
+    );
   }
 }

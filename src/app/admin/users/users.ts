@@ -5,9 +5,17 @@ import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { DialogModule } from 'primeng/dialog';
 import { SelectModule } from 'primeng/select';
-import { FormsModule, ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
+import {
+  FormsModule,
+  ReactiveFormsModule,
+  FormBuilder,
+  Validators,
+  FormGroup
+} from '@angular/forms';
 import { MessageModule } from 'primeng/message';
+
 import { UserService } from '../../services/user.service';
+import { User, UserRole } from '../../models/user.model';
 
 @Component({
   selector: 'app-admin-users',
@@ -19,28 +27,30 @@ import { UserService } from '../../services/user.service';
     DialogModule,
     SelectModule,
     InputTextModule,
-    FormsModule,            // only for search input
-    ReactiveFormsModule,    // for reactive dialog form
+    FormsModule,  
+    ReactiveFormsModule,
     MessageModule
   ],
   templateUrl: './users.html',
   styleUrl: './users.scss'
 })
 export class AdminUsers implements OnInit {
+
   private userService = inject(UserService);
   private fb = inject(FormBuilder);
 
-  users: any[] = [];
+  users: User[] = [];
+  filteredUsers: User[] = [];
+
   loading = true;
   userDialog = false;
-  selectedUser: any = null;
-  searchTerm: string = '';
-  filteredUsers: any[] = [];
 
-  // ⚡ Reactive Form
+  selectedUser: User | null = null;
+  searchTerm = '';
+
   userForm!: FormGroup;
 
-  roles = [
+  roles: { label: string; value: UserRole }[] = [
     { label: 'User', value: 'user' },
     { label: 'Admin', value: 'admin' }
   ];
@@ -60,7 +70,7 @@ export class AdminUsers implements OnInit {
 
   loadUsers() {
     this.userService.getAllUsers().subscribe({
-      next: (data) => {
+      next: (data: User[]) => {
         this.users = data;
         this.filteredUsers = data;
         this.loading = false;
@@ -72,14 +82,14 @@ export class AdminUsers implements OnInit {
   filterUsers() {
     const term = this.searchTerm.toLowerCase().trim();
 
-    this.filteredUsers = this.users.filter(u => {
+    this.filteredUsers = this.users.filter((u) => {
       const nameMatch = u.name?.toLowerCase().includes(term);
       const emailMatch = u.email?.toLowerCase().includes(term);
       return nameMatch || emailMatch;
     });
   }
 
-  editUser(user: any) {
+  editUser(user: User) {
     this.selectedUser = user;
 
     this.userForm.patchValue({
@@ -91,17 +101,17 @@ export class AdminUsers implements OnInit {
     this.userDialog = true;
   }
 
-  deleteUser(user: any) {
+  deleteUser(user: User) {
     if (!confirm(`Delete user ${user.email}?`)) return;
 
     this.userService.deleteUser(user._id).subscribe(() => {
-      this.users = this.users.filter(u => u._id !== user._id);
-      this.filteredUsers = this.filteredUsers.filter(u => u._id !== user._id);
+      this.users = this.users.filter((u) => u._id !== user._id);
+      this.filteredUsers = this.filteredUsers.filter((u) => u._id !== user._id);
     });
   }
 
   saveUser() {
-    if (this.userForm.invalid) {
+    if (this.userForm.invalid || !this.selectedUser) {
       this.userForm.markAllAsTouched();
       return;
     }
@@ -109,12 +119,13 @@ export class AdminUsers implements OnInit {
     const payload = this.userForm.value;
 
     this.userService.updateUser(this.selectedUser._id, payload).subscribe({
-      next: (updated: any) => {
-        const index = this.users.findIndex(u => u._id === updated._id);
+      next: (updated: User) => {
+        const index = this.users.findIndex((u) => u._id === updated._id);
         if (index !== -1) this.users[index] = updated;
 
         this.userDialog = false;
-      }
+      },
+      error: (err) => console.error(err)
     });
   }
 }
