@@ -1,9 +1,8 @@
 <div class="admin-books">
-
   <h1>Books</h1>
 
   <div class="toolbar">
-    <input 
+    <input
       pInputText
       placeholder="Search by title, author or category..."
       [(ngModel)]="searchTerm"
@@ -11,17 +10,17 @@
       class="toolbar-input"
     />
 
-    <button 
-      pButton 
-      label="Add Book" 
+    <button
+      pButton
+      label="Add Book"
       icon="pi pi-plus"
       class="toolbar-btn"
-      (click)="openNew()">
-    </button>
+      (click)="openNew()"
+    ></button>
   </div>
 
-  <p-table 
-    [value]="filteredBooks" 
+  <p-table
+    [value]="filteredBooks"
     dataKey="_id"
     [loading]="loading"
     [paginator]="true"
@@ -31,7 +30,6 @@
     (onRowExpand)="onRowExpand($event)"
     (onRowCollapse)="onRowCollapse($event)"
   >
-
     <!-- CAPTION (toolbar for expand/collapse all) -->
     <ng-template #caption>
       <div class="flex justify-end gap-2">
@@ -75,7 +73,7 @@
     <ng-template #body let-book let-expanded="expanded">
       <tr>
         <td>
-          <p-button 
+          <p-button
             type="button"
             [pRowToggler]="book"
             [text]="true"
@@ -86,10 +84,11 @@
         </td>
 
         <td>
-          <img 
-            [src]="apiUrl + book.imageUrl" 
-            alt="Book image" 
-            width="60" height="80"
+          <img
+            [src]="apiUrl + book.imageUrl"
+            alt="Book image"
+            width="60"
+            height="80"
             style="object-fit: cover; border-radius: 4px;"
           />
         </td>
@@ -97,10 +96,10 @@
         <td>{{ book.title }}</td>
         <td>{{ book.author }}</td>
         <td>{{ book.category }}</td>
-        <td>{{ book.price | number:'1.2-2' }}</td>
+        <td>{{ book.price | number: '1.2-2' }}</td>
         <td>
-          <p-toggleButton 
-            [onIcon]="'pi pi-check'" 
+          <p-toggleButton
+            [onIcon]="'pi pi-check'"
             [offIcon]="'pi pi-times'"
             onLabel="Yes"
             offLabel="No"
@@ -110,18 +109,18 @@
         </td>
 
         <td>
-          <button 
-            pButton 
-            icon="pi pi-pencil" 
+          <button
+            pButton
+            icon="pi pi-pencil"
             class="p-button-text"
-            (click)="editBook(book)">
-          </button>
-          <button 
-            pButton 
-            icon="pi pi-trash" 
+            (click)="editBook(book)"
+          ></button>
+          <button
+            pButton
+            icon="pi pi-trash"
             class="p-button-text p-button-danger"
-            (click)="deleteBook(book)">
-          </button>
+            (click)="deleteBook(book)"
+          ></button>
         </td>
       </tr>
     </ng-template>
@@ -131,7 +130,6 @@
       <tr>
         <td colspan="7">
           <div class="expanded-box">
-
             <h4>Description</h4>
             <p>{{ book.description }}</p>
 
@@ -140,14 +138,12 @@
               <p><strong>Title:</strong> {{ book.title }}</p>
               <p><strong>Author:</strong> {{ book.author }}</p>
               <p><strong>Category:</strong> {{ book.category }}</p>
-              <p><strong>Price:</strong> €{{ book.price | number:'1.2-2' }}</p>
+              <p><strong>Price:</strong> €{{ book.price | number: '1.2-2' }}</p>
             </div>
-
           </div>
         </td>
       </tr>
     </ng-template>
-
   </p-table>
 
   <!-- DIALOG -->
@@ -157,62 +153,101 @@
     [style]="{ width: '500px' }"
     [closable]="false"
     [dismissableMask]="true"
-    [header]="isEditMode ? 'Edit Book' : 'New Book'">
+    [header]="isEditMode ? 'Edit Book' : 'New Book'"
+  >
+    <!-- ✅ Reactive form container -->
+    <div class="form-grid" [formGroup]="bookForm">
+      <div class="field">
+        <label>Book Image</label>
+        <input
+          id="book-image-input"
+          type="file"
+          (change)="onImageSelect($event)"
+          accept="image/*"
+        />
 
-    <div class="form-grid">
-
-        <div class="field">
-            <label>Book Image</label>
-            <input
-                id="book-image-input"
-                type="file"
-                (change)="onImageSelect($event)"
-                accept="image/*"
-            />
-
-            <!-- Preview -->
-            <img 
-                *ngIf="previewImage"
-                [src]="previewImage"
-                width="120"
-                height="160"
-                style="object-fit:cover;margin-top:10px;"
-            />
-        </div>
-
+        <!-- Preview -->
+        <img
+          *ngIf="previewImage"
+          [src]="previewImage"
+          width="120"
+          height="160"
+          style="object-fit: cover; margin-top: 10px;"
+        />
+      </div>
 
       <div class="field">
         <label>Title</label>
-        <input pInputText [(ngModel)]="form.title" />
+        <input pInputText formControlName="title" />
+        <p-message
+          *ngIf="bookForm.get('title')?.touched && bookForm.get('title')?.hasError('required')"
+          severity="error"
+          text="Title is required"
+        ></p-message>
       </div>
 
       <div class="field">
         <label>Author</label>
-        <input pInputText [(ngModel)]="form.author" />
+        <input pInputText formControlName="author" />
+        <p-message
+          *ngIf="bookForm.get('author')?.touched && bookForm.get('author')?.hasError('required')"
+          severity="error"
+          text="Author is required"
+        ></p-message>
       </div>
 
       <div class="field">
         <label>Category</label>
-        <input pInputText [(ngModel)]="form.category" />
+        <input pInputText formControlName="category" />
+        <p-message
+          *ngIf="bookForm.get('category')?.touched && bookForm.get('category')?.hasError('required')"
+          severity="error"
+          text="Category is required"
+        ></p-message>
       </div>
 
       <div class="field">
         <label>Price (€)</label>
-        <p-inputNumber [(ngModel)]="form.price" mode="decimal" [minFractionDigits]="2"></p-inputNumber>
+        <p-inputNumber
+          formControlName="price"
+          mode="decimal"
+          [minFractionDigits]="2"
+          (onBlur)="bookForm.get('price')?.markAsTouched()"
+        ></p-inputNumber>
+
+        <p-message
+          *ngIf="
+            bookForm.get('price')?.touched &&
+            bookForm.get('price')?.hasError('required')
+          "
+          severity="error"
+          text="Price is required"
+        ></p-message>
+
+        <p-message
+          *ngIf="
+            bookForm.get('price')?.touched &&
+            bookForm.get('price')?.hasError('min')
+          "
+          severity="error"
+          text="Price must be greater than 0"
+        ></p-message>
       </div>
 
       <div class="field">
         <label>Description</label>
-        <textarea pInputTextarea rows="4" [(ngModel)]="form.description"></textarea>
+        <textarea pInputTextarea rows="4" formControlName="description"></textarea>
       </div>
-
     </div>
 
     <ng-template pTemplate="footer">
       <button pButton label="Cancel" class="p-button-text" (click)="hideDialog()"></button>
-      <button pButton label="Save" (click)="saveBook()"></button>
+      <button
+        pButton
+        label="Save"
+        (click)="saveBook()"
+        [disabled]="bookForm.invalid"
+      ></button>
     </ng-template>
-
   </p-dialog>
-
 </div>

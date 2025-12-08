@@ -24,8 +24,8 @@
   gap: 1.2rem;
 
   input[pInputText],
-  textarea[pInputTextarea] {
-    width: 100%;
+  .p-textarea {
+    width: 100% !important;
     padding: 0.9rem;
     border-radius: 6px;
     font-size: 1rem;
@@ -36,7 +36,18 @@
     min-height: 150px;
     resize: vertical;
   }
+
+  .contact-form .p-inputtextarea,
+.contact-form .p-inputtextarea textarea {
+  width: 100% !important;
+  padding: 0.9rem;
+  border-radius: 6px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
 }
+}
+
+
 
 /* BUTTON (MATCH SHOP-MORE-BTN) */
 .contact-btn {

@@ -12,18 +12,18 @@
     />
   </div>
 
-  <p-table [value]="filteredUsers" [loading]="loading" [rows]="10" [paginator]="true" [rowsPerPageOptions]="[5, 10, 25, 50]">
+  <p-table 
+    [value]="filteredUsers" 
+    [loading]="loading" 
+    [rows]="10" 
+    [paginator]="true" 
+    [rowsPerPageOptions]="[5, 10, 25, 50]">
+
     <ng-template pTemplate="header">
       <tr>
-        <th pSortableColumn="name">
-          Name <p-sortIcon field="name"></p-sortIcon>
-        </th>
-        <th pSortableColumn="email">
-          Email <p-sortIcon field="email"></p-sortIcon>
-        </th>
-        <th pSortableColumn="role">
-          Role <p-sortIcon field="role"></p-sortIcon>
-        </th>
+        <th pSortableColumn="name">Name <p-sortIcon field="name"></p-sortIcon></th>
+        <th pSortableColumn="email">Email <p-sortIcon field="email"></p-sortIcon></th>
+        <th pSortableColumn="role">Role <p-sortIcon field="role"></p-sortIcon></th>
         <th>Actions</th>
       </tr>
     </ng-template>
@@ -34,52 +34,92 @@
         <td>{{ user.email }}</td>
         <td>{{ user.role }}</td>
         <td class="actions">
-          <button pButton icon="pi pi-pencil" class="p-button-text" (click)="editUser(user)"></button>
-          <button pButton icon="pi pi-trash" class="p-button-text p-button-danger" (click)="deleteUser(user)"></button>
+          <button pButton icon="pi pi-pencil" text (click)="editUser(user)"></button>
+          <button pButton icon="pi pi-trash" class="p-button-danger p-button-text" (click)="deleteUser(user)"></button>
         </td>
       </tr>
     </ng-template>
   </p-table>
 
-  <!-- Edit Dialog -->
+
+  <!-- EDIT DIALOG -->
   <p-dialog
-  [(visible)]="userDialog"
-  [modal]="true"
-  [style]="{ width: '90vw', maxWidth: '450px' }"
-  [closable]="false"
-  [dismissableMask]="true"
-  header="Edit User"
->
+    [(visible)]="userDialog"
+    [modal]="true"
+    [style]="{ width: '90vw', maxWidth: '450px' }"
+    [closable]="false"
+    [dismissableMask]="true"
+    header="Edit User">
 
-  <div class="form-grid">
+    <!-- REACTIVE FORM -->
+    <form [formGroup]="userForm" class="form-grid">
 
-    <div class="field">
-      <label>Role</label>
-      <p-select
-        [options]="roles"
-        optionLabel="label"
-        optionValue="value"
-        [(ngModel)]="form.role"
-      ></p-select>
-    </div>
+      <!-- ROLE -->
+      <div class="field">
+        <label>Role</label>
+        <p-select 
+          [options]="roles"
+          optionLabel="label"
+          optionValue="value"
+          formControlName="role">
+        </p-select>
 
-    <div class="field">
-      <label>Name</label>
-      <input pInputText [(ngModel)]="form.name" />
-    </div>
+        <p-message 
+          *ngIf="userForm.get('role')?.touched && userForm.get('role')?.hasError('required')"
+          severity="error"
+          text="Role is required">
+        </p-message>
+      </div>
 
-    <div class="field">
-      <label>Email</label>
-      <input pInputText [(ngModel)]="form.email" />
-    </div>
+      <!-- NAME -->
+      <div class="field">
+        <label>Name</label>
+        <input 
+          pInputText 
+          formControlName="name"
+          (blur)="userForm.get('name')?.markAsTouched()" />
 
-  </div>
+        <p-message 
+          *ngIf="userForm.get('name')?.touched && userForm.get('name')?.hasError('required')"
+          severity="error"
+          text="Name is required">
+        </p-message>
+      </div>
 
-  <ng-template pTemplate="footer">
-    <button pButton label="Cancel" class="p-button-text" (click)="userDialog = false"></button>
-    <button pButton label="Save" (click)="saveUser()"></button>
-  </ng-template>
+      <!-- EMAIL -->
+      <div class="field">
+        <label>Email</label>
+        <input 
+          pInputText 
+          formControlName="email"
+          (blur)="userForm.get('email')?.markAsTouched()" />
 
-</p-dialog>
+        <p-message 
+          *ngIf="userForm.get('email')?.touched && userForm.get('email')?.hasError('required')"
+          severity="error"
+          text="Email is required">
+        </p-message>
+
+        <p-message 
+          *ngIf="userForm.get('email')?.touched && userForm.get('email')?.hasError('email')"
+          severity="error"
+          text="Invalid email format">
+        </p-message>
+      </div>
+
+    </form>
+
+    <ng-template pTemplate="footer">
+      <button pButton label="Cancel" class="p-button-text" (click)="userDialog = false"></button>
+
+      <button 
+        pButton 
+        label="Save" 
+        (click)="saveUser()"
+        [disabled]="userForm.invalid">
+      </button>
+    </ng-template>
+
+  </p-dialog>
 
 </div>

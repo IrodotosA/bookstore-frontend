@@ -1,8 +1,9 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, Validators, FormGroup, FormArray, AbstractControl, ValidationErrors } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
+import { MessageModule } from 'primeng/message';
 import { CartService } from '../services/cart.service';
 import { OrderService } from '../services/order.service';
 import { Router } from '@angular/router';
@@ -12,9 +13,10 @@ import { Router } from '@angular/router';
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule,
+    ReactiveFormsModule,
     ButtonModule,
-    InputTextModule
+    InputTextModule,
+    MessageModule
   ],
   templateUrl: './checkout.html',
   styleUrl: './checkout.scss'
@@ -23,36 +25,88 @@ export class Checkout {
   cart = inject(CartService);
   orderService = inject(OrderService);
   router = inject(Router);
-  paymentMethod: string = 'card';
-
-  // Form model
-  customer = {
-    name: '',
-    email: '',
-    phone: '',
-    address: '',
-    city: '',
-    postalCode: '',
-    country: ''
-  };
+  fb = inject(FormBuilder);
 
   testCards = [
     { type: "Visa", number: "4111 1111 1111 1111", name: "John Doe", exp: "12/28", cvv: "123" },
     { type: "Mastercard", number: "5555 5555 5555 4444", name: "John Doe", exp: "12/28", cvv: "123" }
   ];
 
-  card = {
-    number: '',
-    name: '',
-    exp: '',
-    cvv: ''
-  };
+  checkoutForm!: FormGroup;
+
+  ngOnInit() {
+    this.checkoutForm = this.fb.group(
+      {
+        customer: this.fb.group({
+          name: ['', Validators.required],
+          email: ['', [Validators.required, Validators.email]],
+          phone: ['', [Validators.required, Validators.pattern(/^[0-9+]+$/)]],
+          address: ['', Validators.required],
+          city: ['', Validators.required],
+          postalCode: ['', [Validators.required, Validators.pattern(/^[0-9]+$/)]],
+          country: ['', Validators.required],
+        }),
+
+        paymentMethod: ['card', Validators.required],
+
+        card: this.fb.group({
+          number: [''],
+          name: [''],
+          exp: [''],
+          cvv: ['']
+        })
+      },
+      { validators: [this.cardValidator()] }
+    );
+  }
+
+  // --- Custom card validator ---
+  cardValidator() {
+    return (group: AbstractControl): ValidationErrors | null => {
+      const payMethod = group.get('paymentMethod')?.value;
+
+      if (payMethod !== 'card') return null;
+
+      const number = group.get('card.number')?.value?.trim();
+      const name = group.get('card.name')?.value?.trim();
+      const exp = group.get('card.exp')?.value?.trim();
+      const cvv = group.get('card.cvv')?.value?.trim();
+
+      if (!number || !name || !exp || !cvv) {
+        return { cardIncomplete: true };
+      }
+
+      if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(exp)) {
+        return { invalidExpFormat: true };
+      }
+
+      const match = this.testCards.find(
+        c =>
+          c.number.replace(/\s+/g, '') === number.replace(/\s+/g, '') &&
+          c.exp === exp &&
+          c.cvv === cvv
+      );
+
+      if (!match) {
+        return { invalidCard: true };
+      }
+
+      return null;
+    };
+  }
+
+  // Getters for clean template use
+  get f() { return this.checkoutForm; }
+  get customer() { return this.f.get('customer') as FormGroup; }
+  get card() { return this.f.get('card') as FormGroup; }
 
   placeOrder() {
-    if (!this.isFormValid() || !this.isCardValid()) {
-      alert("Please complete all required fields.");
+    if (this.checkoutForm.invalid) {
+      this.checkoutForm.markAllAsTouched();
       return;
     }
+
+    const data = this.checkoutForm.value;
 
     const orderData = {
       items: this.cart.cartItems.map(item => ({
@@ -61,71 +115,19 @@ export class Checkout {
         price: item.price,
         quantity: item.quantity
       })),
-      totalPrice: this.total,
-      billing: this.customer,
-      paymentMethod: this.paymentMethod,
-      cardNumber: this.card.number   // backend extracts last 4
+      totalPrice: this.cart.getTotalPrice(),
+      billing: data.customer,
+      paymentMethod: data.paymentMethod,
+      cardNumber: data.card.number // backend extracts last 4
     };
 
     this.orderService.createOrder(orderData).subscribe({
-      next: (res) => {
-        console.log("Order created:", res);
-
-        // Clear cart after success
+      next: () => {
         this.cart.clearCart();
-
-        // Navigate to thank you page (we can build this next)
         this.router.navigate(['/order-success']);
       },
-      error: (err) => {
-        console.error(err);
-        alert("Failed to place order.");
-      }
+      error: () => alert("Order failed.")
     });
-  }
-
-  clearCart() {
-    this.cart.cartItems;
-    localStorage.removeItem('cart');
-  }
-
-  isFormValid() {
-    return (
-      this.customer.name &&
-      this.customer.phone &&
-      this.customer.address &&
-      this.customer.city &&
-      this.customer.postalCode &&
-      this.customer.country &&
-      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.customer.email) &&  // email regex
-      /^[0-9+]+$/.test(this.customer.phone) &&                  // phone regex
-      /^[0-9]+$/.test(this.customer.postalCode)                // postal code regex
-    );
-  }
-
-  isCardValid(): boolean {
-    if (this.paymentMethod !== 'card') return true; 
-
-    // All fields must be filled
-    if (
-      !this.card.number ||
-      !this.card.name ||
-      !this.card.exp ||
-      !this.card.cvv
-    ) {
-      return false;
-    }
-
-    const cleanNumber = this.card.number.replace(/\s+/g, '');
-
-    // Must match one of the test cards exactly
-    const match = this.testCards.find(c =>
-      c.number.replace(/\s+/g, '') === cleanNumber &&
-      c.exp === this.card.exp &&
-      c.cvv === this.card.cvv
-    );
-
-    return !!match; 
   }
 
   get items() {

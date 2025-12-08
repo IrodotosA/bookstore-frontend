@@ -1,49 +1,84 @@
 <div class="hero">
-    <div class="shop-hero-content">
-        <h1>Contact Us</h1>
-        <p>We’d love to hear from you. Fill out the form below.</p>
-    </div>
+  <div class="shop-hero-content">
+      <h1>Contact Us</h1>
+      <p>We’d love to hear from you. Fill out the form below.</p>
+  </div>
 </div>
 
 <section class="contact-section">
 
-  <form (ngSubmit)="submit()" class="contact-form">
+  <form [formGroup]="contactForm" (ngSubmit)="submit()" class="contact-form">
 
-    <input
-      pInputText
-      type="text"
-      placeholder="Your Name"
-      [(ngModel)]="name"
-      name="name"
-    />
+    <!-- NAME -->
+    <div>
+      <input 
+        pInputText 
+        type="text" 
+        placeholder="Your Name"
+        formControlName="name"
+      />
+      <p-message 
+        *ngIf="f['name'].touched && f['name'].hasError('required')"
+        severity="error"
+        text="Name is required">
+      </p-message>
+    </div>
 
-    <input
-      pInputText
-      type="email"
-      placeholder="Your Email"
-      [(ngModel)]="email"
-      name="email"
-    />
+    <!-- EMAIL -->
+    <div>
+      <input 
+        pInputText 
+        type="email"
+        placeholder="Your Email"
+        formControlName="email"
+      />
+      <p-message 
+        *ngIf="f['email'].touched && f['email'].hasError('required')"
+        severity="error"
+        text="Email is required">
+      </p-message>
 
-    <input
-      pInputText
-      type="text"
-      placeholder="Subject"
-      [(ngModel)]="subject"
-      name="subject"
-    />
+      <p-message 
+        *ngIf="f['email'].touched && f['email'].hasError('email')"
+        severity="error"
+        text="Invalid email format">
+      </p-message>
+    </div>
 
-    <textarea
-      pTextarea
-      placeholder="Your Message"
-      [(ngModel)]="message"
-      name="message"
-    ></textarea>
+    <!-- SUBJECT -->
+    <div>
+      <input 
+        pInputText 
+        type="text"
+        placeholder="Subject"
+        formControlName="subject"
+      />
+      <p-message 
+        *ngIf="f['subject'].touched && f['subject'].hasError('required')"
+        severity="error"
+        text="Subject is required">
+      </p-message>
+    </div>
 
+    <!-- MESSAGE -->
+    <div>
+      <textarea
+        pTextarea
+        placeholder="Your Message"
+        formControlName="message"
+      ></textarea>
+      <p-message 
+        *ngIf="f['message'].touched && f['message'].hasError('required')"
+        severity="error"
+        text="Message cannot be empty">
+      </p-message>
+    </div>
+
+    <!-- BUTTON -->
     <button
       pButton
       type="submit"
-      [disabled]="loading"
+      [disabled]="loading || contactForm.invalid"
       label="{{ loading ? 'Sending...' : 'Send Message' }}"
       class="shop-more-btn"
     ></button>
@@ -53,4 +88,5 @@
   <p *ngIf="success" [class.ok]="success.ok" [class.error]="!success.ok">
     {{ success.msg }}
   </p>
+
 </section>

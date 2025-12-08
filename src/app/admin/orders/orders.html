@@ -139,119 +139,175 @@
     </ng-template>
   </p-table>
 
-    <p-dialog
+  <p-dialog
     [(visible)]="orderDialog"
     [modal]="true"
     [style]="{ width: '90vw', maxWidth: '850px' }"
     header="Edit Order"
-    >
+  >
+    <form [formGroup]="orderForm" class="form-grid">
 
-    <div class="form-grid">
+      <!-- BILLING SECTION -->
+      <h3>Billing Information</h3>
 
-        <!-- BILLING SECTION -->
-        <h3>Billing Information</h3>
+      <div formGroupName="billing" class="form-grid">
+        <div class="field">
+          <label>Name</label>
+          <input pInputText formControlName="name" />
 
-        <div class="form-grid">
-            <div class="field">
-                <label>Name</label>
-                <input pInputText [(ngModel)]="form.billing.name" />
-            </div>
-
-            <div class="field">
-                <label>Email</label>
-                <input pInputText [(ngModel)]="form.billing.email" />
-            </div>
-
-            <div class="field">
-                <label>Phone</label>
-                <input pInputText [(ngModel)]="form.billing.phone" />
-            </div>
-
-            <div class="field">
-                <label>Address</label>
-                <input pInputText [(ngModel)]="form.billing.address" />
-            </div>
-
-            <div class="field">
-                <label>City</label>
-                <input pInputText [(ngModel)]="form.billing.city" />
-            </div>
-
-            <div class="field">
-                <label>Postal Code</label>
-                <input pInputText [(ngModel)]="form.billing.postalCode" />
-            </div>
-
-            <div class="field">
-                <label>Country</label>
-                <input pInputText [(ngModel)]="form.billing.country" />
-            </div>
+          <p-message
+            *ngIf="billing.get('name')?.touched && billing.get('name')?.hasError('required')"
+            severity="error"
+            text="Name is required"
+          ></p-message>
         </div>
 
+        <div class="field">
+          <label>Email</label>
+          <input pInputText formControlName="email" />
 
-        <!-- ORDER ITEMS -->
-        <h3>Order Items</h3>
+          <p-message
+            *ngIf="billing.get('email')?.touched && billing.get('email')?.hasError('required')"
+            severity="error"
+            text="Email is required"
+          ></p-message>
 
-        <table class="items-table">
+          <p-message
+            *ngIf="billing.get('email')?.touched && billing.get('email')?.hasError('email')"
+            severity="error"
+            text="Invalid email format"
+          ></p-message>
+        </div>
+
+        <div class="field">
+          <label>Phone</label>
+          <input pInputText formControlName="phone" />
+          <p-message
+            *ngIf="billing.get('phone')?.touched && billing.get('phone')?.hasError('required')"
+            severity="error"
+            text="Phone is required"
+          ></p-message>
+        </div>
+
+        <div class="field">
+          <label>Address</label>
+          <input pInputText formControlName="address" />
+          <p-message
+            *ngIf="billing.get('address')?.touched && billing.get('address')?.hasError('required')"
+            severity="error"
+            text="Address is required"
+          ></p-message>
+        </div>
+
+        <div class="field">
+          <label>City</label>
+          <input pInputText formControlName="city" />
+          <p-message
+            *ngIf="billing.get('city')?.touched && billing.get('city')?.hasError('required')"
+            severity="error"
+            text="City is required"
+          ></p-message>
+        </div>
+
+        <div class="field">
+          <label>Postal Code</label>
+          <input pInputText formControlName="postalCode" />
+          <p-message
+            *ngIf="billing.get('postalCode')?.touched && billing.get('postalCode')?.hasError('required')"
+            severity="error"
+            text="Postal Code is required"
+          ></p-message>
+        </div>
+
+        <div class="field">
+          <label>Country</label>
+          <input pInputText formControlName="country" />
+          <p-message
+            *ngIf="billing.get('country')?.touched && billing.get('country')?.hasError('required')"
+            severity="error"
+            text="Country is required"
+          ></p-message>
+        </div>
+      </div>
+
+      <!-- ORDER ITEMS -->
+      <h3>Order Items</h3>
+
+      <table class="items-table" formArrayName="items">
         <thead>
-            <tr>
+          <tr>
             <th>Title</th>
             <th>Qty</th>
             <th>Price</th>
             <th>Subtotal</th>
             <th></th>
-            </tr>
+          </tr>
         </thead>
 
         <tbody>
-            <tr *ngFor="let item of form.items; let i = index">
+          <tr *ngFor="let item of itemsArray.controls; let i = index" [formGroupName]="i">
             <td>
-                <input pInputText [(ngModel)]="item.title" (ngModelChange)="calculateTotal()" />
+              <input pInputText (blur)="item.get('title')?.markAsTouched()" formControlName="title" />
             </td>
             <td>
-                <p-inputNumber [(ngModel)]="item.quantity" [min]="1" (onInput)="calculateTotal()"></p-inputNumber>
+              <p-inputNumber formControlName="quantity" [min]="1" (onBlur)="item.get('quantity')?.markAsTouched()"></p-inputNumber>
             </td>
             <td>
-                <p-inputNumber [(ngModel)]="item.price" mode="decimal" [minFractionDigits]="2" (onInput)="calculateTotal()"></p-inputNumber>
+              <p-inputNumber formControlName="price" mode="decimal" [minFractionDigits]="2" (onBlur)="item.get('price')?.markAsTouched()"></p-inputNumber>
             </td>
-            <td>{{ item.price * item.quantity | number:'1.2-2' }}</td>
             <td>
-                <button pButton icon="pi pi-trash" class="p-button-danger p-button-text" (click)="removeItem(i)"></button>
+              {{
+                (item.get('price')?.value || 0) *
+                (item.get('quantity')?.value || 0)
+                | number:'1.2-2'
+              }}
             </td>
-            </tr>
+            <td>
+              <button
+                pButton
+                icon="pi pi-trash"
+                class="p-button-danger p-button-text"
+                (click)="removeItem(i)"
+                type="button"
+              ></button>
+            </td>
+          </tr>
         </tbody>
-        </table>
+      </table>
 
-        <!-- <button pButton label="Add Item" icon="pi pi-plus" class="p-button-text" (click)="addItem()"></button> -->
-
-        <!-- STATUS -->
-        <h3>Status</h3>
-        <p-select
+      <!-- STATUS -->
+      <h3>Status</h3>
+      <p-select
         [options]="statuses"
         optionLabel="label"
         optionValue="value"
-        [(ngModel)]="form.status"
-        ></p-select>
+        formControlName="status"
+      ></p-select>
 
-        <!-- PAYMENT -->
-        <h3>Payment Method</h3>
-        <p-select
+      <!-- PAYMENT -->
+      <h3>Payment Method</h3>
+      <p-select
         [options]="paymentMethods"
         optionLabel="label"
         optionValue="value"
-        [(ngModel)]="form.paymentMethod"
-        ></p-select>
+        formControlName="paymentMethod"
+      ></p-select>
 
-        <!-- TOTAL -->
-        <h3>Total Price</h3>
-        <p-inputNumber [(ngModel)]="form.totalPrice" mode="decimal" [minFractionDigits]="2"></p-inputNumber>
+      <!-- TOTAL -->
+      <h3>Total Price</h3>
+      <p-inputNumber
+        formControlName="totalPrice"
+        mode="decimal"
+        [minFractionDigits]="2"
+        readonly="true"
+      ></p-inputNumber>
 
-    </div>
+    </form>
 
     <ng-template pTemplate="footer">
-        <button pButton label="Cancel" class="p-button-text" (click)="hideDialog()"></button>
-        <button pButton label="Save" (click)="saveOrder()"></button>
+      <button pButton label="Cancel" class="p-button-text" (click)="hideDialog()"></button>
+      <button pButton label="Save" (click)="saveOrder()" [disabled]="orderForm.invalid"></button>
     </ng-template>
+  </p-dialog>
 
-    </p-dialog>
 </div>

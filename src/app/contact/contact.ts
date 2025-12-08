@@ -1,10 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
 
 import { InputTextModule } from 'primeng/inputtext';
 import { TextareaModule } from 'primeng/textarea';
 import { ButtonModule } from 'primeng/button';
+import { MessageModule } from 'primeng/message';
 
 import { ContactService } from '../services/contact.service';
 
@@ -13,55 +14,50 @@ import { ContactService } from '../services/contact.service';
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule,
+    ReactiveFormsModule,
     InputTextModule,
     TextareaModule,
-    ButtonModule
+    ButtonModule,
+    MessageModule
   ],
   templateUrl: './contact.html',
   styleUrl: './contact.scss'
 })
 export class Contact {
+  fb = inject(FormBuilder);
+  contactService = inject(ContactService);
 
-  name = '';
-  email = '';
-  subject = '';
-  message = '';
-
-  success: { ok: boolean; msg: string } | null = null;
   loading = false;
+  success: { ok: boolean; msg: string } | null = null;
 
-  constructor(private contactService: ContactService) {}
+  contactForm: FormGroup = this.fb.group({
+    name: ['', Validators.required],
+    email: ['', [Validators.required, Validators.email]],
+    subject: ['', Validators.required],
+    message: ['', Validators.required]
+  });
+
+  get f() {
+    return this.contactForm.controls;
+  }
 
   submit() {
-    if (!this.name || !this.email || !this.subject || !this.message) {
-      this.success = { ok: false, msg: 'All fields are required.' };
+    if (this.contactForm.invalid) {
+      this.contactForm.markAllAsTouched();
       return;
     }
 
     this.loading = true;
+    this.success = null;
 
-    this.contactService.sendMessage({
-      name: this.name,
-      email: this.email,
-      subject: this.subject,
-      message: this.message
-    }).subscribe({
+    this.contactService.sendMessage(this.contactForm.value).subscribe({
       next: () => {
         this.success = { ok: true, msg: 'Message sent successfully!' };
-
-        // Reset form
-        this.name = '';
-        this.email = '';
-        this.subject = '';
-        this.message = '';
+        this.contactForm.reset();
         this.loading = false;
       },
       error: () => {
-        this.success = {
-          ok: false,
-          msg: 'Something went wrong. Please try again.'
-        };
+        this.success = { ok: false, msg: 'Something went wrong. Please try again.' };
         this.loading = false;
       }
     });
