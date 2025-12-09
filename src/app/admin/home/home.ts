@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
@@ -8,9 +8,10 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 
 import {
   DashboardResponse,
-  OrdersByStatus,
   OrderStatusEntry
 } from '../../models/dashboard.model';
+
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-admin-home',
@@ -26,6 +27,8 @@ import {
 })
 export class HomeAdmin implements OnInit {
 
+  private http = inject(HttpClient);
+
   loading = true;
 
   totalRevenue = 0;
@@ -35,17 +38,7 @@ export class HomeAdmin implements OnInit {
   totalBooks = 0;
 
   labels: string[] = [];
-  chartData!: {
-    labels: string[];
-    datasets: {
-      label: string;
-      data: number[];
-      borderColor: string;
-      backgroundColor: string;
-      fill: boolean;
-      tension: number;
-    }[];
-  };
+  chartData: any;
 
   chartOptions = {
     responsive: true,
@@ -58,54 +51,53 @@ export class HomeAdmin implements OnInit {
     }
   };
 
-  constructor(private http: HttpClient) {}
+  // Signal for API request
+  private dashboardSig = toSignal(
+    this.http.get<DashboardResponse>(`${environment.apiUrl}/api/admin/dashboard`),
+    { initialValue: null }
+  );
+
+  
+  private dashboardEffect = effect(() => {
+    const data = this.dashboardSig();
+    if (!data) return;
+
+    this.totalRevenue = data.totalRevenueLast30Days;
+    this.totalOrders = data.totalOrdersLast30Days;
+    this.pendingOrders = data.pendingOrders;
+    this.totalUsers = data.totalUsers;
+    this.totalBooks = data.totalBooks;
+
+    const statuses = ['pending', 'shipped', 'completed', 'canceled'];
+
+    const datasets = statuses.map(status => {
+      const values = this.mapStatusDataToArray(
+        data.ordersByStatus?.[status] ?? [],
+        this.labels
+      );
+
+      return {
+        label: status.charAt(0).toUpperCase() + status.slice(1),
+        data: values,
+        borderColor: this.mapStatusColor(status),
+        backgroundColor: this.mapStatusColor(status),
+        fill: false,
+        tension: 0.3
+      };
+    });
+
+    this.chartData = {
+      labels: this.labels,
+      datasets
+    };
+
+    this.loading = false;
+  });
+
+  constructor() {}
 
   ngOnInit() {
     this.labels = this.generateLast30DaysLabels();
-    this.loadDashboard();
-  }
-
-  loadDashboard() {
-    this.http.get<DashboardResponse>(`${environment.apiUrl}/api/admin/dashboard`)
-      .subscribe({
-        next: (data) => {
-          this.totalRevenue = data.totalRevenueLast30Days;
-          this.totalOrders = data.totalOrdersLast30Days;
-          this.pendingOrders = data.pendingOrders;
-          this.totalUsers = data.totalUsers;
-          this.totalBooks = data.totalBooks;
-
-          const statuses: string[] = ['pending', 'shipped', 'completed', 'canceled'];
-
-
-          const datasets = statuses.map(status => {
-            const values = this.mapStatusDataToArray(
-              data.ordersByStatus?.[status] ?? [],
-              this.labels
-            );
-
-            return {
-              label: status.charAt(0).toUpperCase() + status.slice(1),
-              data: values,
-              borderColor: this.mapStatusColor(status),
-              backgroundColor: this.mapStatusColor(status),
-              fill: false,
-              tension: 0.3
-            };
-          });
-
-          this.chartData = {
-            labels: this.labels,
-            datasets
-          };
-
-          this.loading = false;
-        },
-        error: (err) => {
-          console.error("Dashboard load error:", err);
-          this.loading = false;
-        }
-      });
   }
 
   generateLast30DaysLabels(): string[] {
@@ -129,9 +121,7 @@ export class HomeAdmin implements OnInit {
   mapStatusDataToArray(statusData: OrderStatusEntry[], labels: string[]): number[] {
     const lookup = new Map<string, number>();
 
-    statusData.forEach(entry => {
-      lookup.set(entry.date, entry.count);
-    });
+    statusData.forEach(entry => lookup.set(entry.date, entry.count));
 
     return labels.map(date => lookup.get(date) ?? 0);
   }

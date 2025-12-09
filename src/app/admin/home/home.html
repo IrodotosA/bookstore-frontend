@@ -1,47 +1,46 @@
-<div class="dashboard-container" *ngIf="!loading; else loadingTpl">
+<div class="dashboard-container">
+  @if (!loading) {
 
-  <!-- TOP METRIC CARDS -->
-  <div class="cards-grid">
+    <!-- TOP METRIC CARDS -->
+    <div class="cards-grid">
 
-    <p-card>
-      <h3>Total Revenue (Last 30 Days)</h3>
-      <p class="value">€ {{ totalRevenue }}</p>
-    </p-card>
+      <p-card>
+        <h3>Total Revenue (Last 30 Days)</h3>
+        <p class="value">€ {{ totalRevenue }}</p>
+      </p-card>
 
-    <p-card>
-      <h3>Total Orders (Last 30 Days)</h3>
-      <p class="value">{{ totalOrders }}</p>
-    </p-card>
+      <p-card>
+        <h3>Total Orders (Last 30 Days)</h3>
+        <p class="value">{{ totalOrders }}</p>
+      </p-card>
 
-    <p-card>
-      <h3>Pending Orders</h3>
-      <p class="value">{{ pendingOrders }}</p>
-    </p-card>
+      <p-card>
+        <h3>Pending Orders</h3>
+        <p class="value">{{ pendingOrders }}</p>
+      </p-card>
 
-    <p-card>
-      <h3>Total Users</h3>
-      <p class="value">{{ totalUsers }}</p>
-    </p-card>
+      <p-card>
+        <h3>Total Users</h3>
+        <p class="value">{{ totalUsers }}</p>
+      </p-card>
 
-    <p-card>
-      <h3>Total Books</h3>
-      <p class="value">{{ totalBooks }}</p>
-    </p-card>
+      <p-card>
+        <h3>Total Books</h3>
+        <p class="value">{{ totalBooks }}</p>
+      </p-card>
 
-  </div>
-
-  <!-- CHART -->
-    <div class="chart-scroll">
-        <div class="chart-wrapper">
-            <p-chart type="line" [data]="chartData" [options]="chartOptions"></p-chart>
-        </div>
     </div>
 
-</div>
+    <!-- CHART -->
+    <div class="chart-scroll">
+      <div class="chart-wrapper">
+        <p-chart type="line" [data]="chartData" [options]="chartOptions"></p-chart>
+      </div>
+    </div>
 
-<!-- LOADING -->
-<ng-template #loadingTpl>
-  <div class="loading-center">
-    <p-progressSpinner></p-progressSpinner>
-  </div>
-</ng-template>
+  } @else {
+    <div class="loading-center">
+      <p-progressSpinner></p-progressSpinner>
+    </div>
+  }
+</div>

@@ -1,11 +1,10 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { WishlistService } from '../services/wishlist.service';
 import { BookService } from '../services/book.service';
 import { RouterModule, Router } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
-import { CartService } from '../services/cart.service';
 import { DialogModule } from 'primeng/dialog';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextModule } from 'primeng/inputtext';
@@ -13,8 +12,10 @@ import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { FormsModule } from '@angular/forms';
 import { environment } from '../../environments/environment';
-
+import { CartService } from '../services/cart.service';
 import { Book } from '../models/book.model';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-wishlist',
@@ -34,7 +35,7 @@ import { Book } from '../models/book.model';
   templateUrl: './wishlist.html',
   styleUrl: './wishlist.scss'
 })
-export class Wishlist implements OnInit {
+export class Wishlist {
 
   wishlist = inject(WishlistService);
   bookService = inject(BookService);
@@ -43,6 +44,7 @@ export class Wishlist implements OnInit {
 
   apiUrl = environment.apiUrl;
 
+  // Local reactive state
   books: Book[] = [];
   filteredBooks: Book[] = [];
   loading = true;
@@ -56,31 +58,40 @@ export class Wishlist implements OnInit {
   quantity = 1;
   searchQuery = '';
 
-  ngOnInit() {
-    this.wishlist.wishlist$.subscribe(ids => {
-      if (ids.length === 0) {
+  // Convert wishlist IDs → signal
+  wishlistIds = toSignal(this.wishlist.wishlist$, { initialValue: [] });
+
+  // Convert all books → signal so we can filter client-side
+  allBooksSig = toSignal(this.bookService.getAllBooks(), { initialValue: [] });
+
+  constructor() {
+
+    // Effect: whenever wishlist changes → recompute books
+    effect(() => {
+      const ids = this.wishlistIds();
+      const allBooks = this.allBooksSig();
+
+      if (!ids || ids.length === 0) {
         this.books = [];
         this.filteredBooks = [];
         this.loading = false;
         return;
       }
 
-      this.bookService.getAllBooks().subscribe({
-        next: (allBooks: Book[]) => {
-          this.books = allBooks.filter(b => ids.includes(b._id));
-          this.filteredBooks = [...this.books];
-          this.loading = false;
-        },
-        error: () => (this.loading = false)
-      });
+      this.books = allBooks.filter(b => ids.includes(b._id));
+      this.filteredBooks = [...this.books];
+      this.loading = false;
     });
+
   }
 
-  emptyWishlist() {
-    this.wishlist.clearAll().subscribe(() => {
-      this.books = [];
-      this.filteredBooks = [];
-    });
+  async emptyWishlist() {
+    try {
+      await firstValueFrom(this.wishlist.clearAll());
+      // effect (wishlistIds + allBooks) will handle UI
+    } catch (err) {
+      console.error('Failed to clear wishlist:', err);
+    }
   }
 
   applySearch() {
@@ -98,16 +109,15 @@ export class Wishlist implements OnInit {
     );
   }
 
-  openDetails(book: Book) {
+  async openDetails(book: Book) {
     this.selectedBook = null;
     this.addToCartBook = book;
     this.quantity = 1;
     this.showDetailsDialog = true;
 
-    this.bookService.getBookById(book._id).subscribe({
-      next: (data: Book) => (this.selectedBook = data),
-      error: err => console.error(err)
-    });
+    this.selectedBook = await firstValueFrom(
+      this.bookService.getBookById(book._id)
+    );
   }
 
   openAddToCart(book: Book) {
@@ -129,20 +139,17 @@ export class Wishlist implements OnInit {
     this.selectedBook = null;
   }
 
-  increaseQuantity() {
-    this.quantity++;
+  increaseQuantity() { this.quantity++; }
+  decreaseQuantity() { this.quantity = Math.max(1, this.quantity - 1); }
+
+  async remove(book: Book) {
+    await firstValueFrom(this.wishlist.remove(book._id));
+    // effect auto-updates UI
   }
 
-  decreaseQuantity() {
-    this.quantity = Math.max(1, this.quantity - 1);
-  }
-
-  remove(book: Book) {
-    this.wishlist.remove(book._id).subscribe();
-  }
-
-  toggleWishlist(book: Book) {
-    this.wishlist.toggle(book._id).subscribe();
+  async toggleWishlist(book: Book) {
+    await firstValueFrom(this.wishlist.toggle(book._id));
+    // effect auto-updates UI
   }
 
   isInWishlist(id: string) {

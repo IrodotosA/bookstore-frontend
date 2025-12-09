@@ -8,6 +8,7 @@ import { ButtonModule } from 'primeng/button';
 import { MessageModule } from 'primeng/message';
 
 import { ContactService } from '../services/contact.service';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-contact',
@@ -41,7 +42,7 @@ export class Contact {
     return this.contactForm.controls;
   }
 
-  submit() {
+  async submit() {
     if (this.contactForm.invalid) {
       this.contactForm.markAllAsTouched();
       return;
@@ -50,16 +51,17 @@ export class Contact {
     this.loading = true;
     this.success = null;
 
-    this.contactService.sendMessage(this.contactForm.value).subscribe({
-      next: () => {
-        this.success = { ok: true, msg: 'Message sent successfully!' };
-        this.contactForm.reset();
-        this.loading = false;
-      },
-      error: () => {
-        this.success = { ok: false, msg: 'Something went wrong. Please try again.' };
-        this.loading = false;
-      }
-    });
+    try {
+      await firstValueFrom(this.contactService.sendMessage(this.contactForm.value));
+
+      this.success = { ok: true, msg: 'Message sent successfully!' };
+      this.contactForm.reset();
+
+    } catch (err) {
+      this.success = { ok: false, msg: 'Something went wrong. Please try again.' };
+
+    } finally {
+      this.loading = false;
+    }
   }
 }

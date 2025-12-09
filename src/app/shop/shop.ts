@@ -1,6 +1,12 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal, effect } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { firstValueFrom } from 'rxjs';
+
 import { BookService } from '../services/book.service';
 import { CartService } from '../services/cart.service';
+import { WishlistService } from '../services/wishlist.service';
+import { AuthService } from '../auth/auth.service';
+
 import { FormsModule } from '@angular/forms';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
@@ -14,19 +20,17 @@ import { InputIconModule } from 'primeng/inputicon';
 import { DialogModule } from 'primeng/dialog';
 import { HttpClientModule } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
-import { WishlistService } from '../services/wishlist.service';
-import { AuthService } from '../auth/auth.service';
-import { environment } from '../../environments/environment';
 
+import { environment } from '../../environments/environment';
 import { Book } from '../models/book.model';
 
 @Component({
   selector: 'app-shop',
   standalone: true,
   imports: [
-    CommonModule, 
-    CardModule, 
-    ButtonModule, 
+    CommonModule,
+    CardModule,
+    ButtonModule,
     HttpClientModule,
     DrawerModule,
     SelectModule,
@@ -39,35 +43,41 @@ import { Book } from '../models/book.model';
     InputNumberModule
   ],
   templateUrl: './shop.html',
-  styleUrl: './shop.scss',
+  styleUrl: './shop.scss'
 })
 export class Shop implements OnInit {
 
-  constructor(
-    private bookService: BookService,
-    // private cartService: CartService,
-    private wishlist: WishlistService,
-    private auth: AuthService
-  ) {}
+  // SERVICES
+  private bookService = inject(BookService);
+  private wishlist = inject(WishlistService);
+  private auth = inject(AuthService);
+  cart = inject(CartService);
 
-  books: Book[] = [];
-  filteredBooks: Book[] = [];
-  visibleBooks: Book[] = [];
+  apiUrl = environment.apiUrl;
+
+  // SIGNAL STATE FOR BOOK LISTING
+  books = signal<Book[]>([]);
+  filteredBooks = signal<Book[]>([]);
+  visibleBooks = signal<Book[]>([]);
+  allCategories = signal<string[]>([]);
+  loading = signal(true);
+
+  // Only drawer uses signal (wishlist pattern)
+  showFilters = signal(false);
+
+  // DIALOG + BOOK SELECTION (NO SIGNALS – same as Wishlist)
+  showDetailsDialog = false;
+  showAddToCartDialog = false;
 
   selectedBook: Book | null = null;
   addToCartBook: Book | null = null;
 
-  cart = inject(CartService); // or this.cartService if preferred
-
-  showFilters = false;
-  loading = true;
-
-  searchQuery = '';
-  showDetailsDialog = false;
   quantity = 1;
-  showAddToCartDialog = false;
 
-  apiUrl = environment.apiUrl;
+  // FILTER STATE
+  searchQuery = '';
+  selectedSort: string | null = null;
+  selectedCategories: string[] = [];
 
   itemsPerPage = 9;
   currentIndex = 0;
@@ -78,37 +88,52 @@ export class Shop implements OnInit {
     { label: 'Newest', value: 'newest' }
   ];
 
-  selectedSort: string | null = null;
+  // Load books with toSignal
+  booksFromApi = toSignal(this.bookService.getAllBooks(), { initialValue: [] });
 
-  allCategories: string[] = [];
-  selectedCategories: string[] = [];
+  constructor() {
+    effect(() => {
+      const data = this.booksFromApi();
 
-  ngOnInit() {
-    this.bookService.getAllBooks().subscribe({
-      next: (data: Book[]) => {
-        this.books = data;
-        this.filteredBooks = [...data];
-        this.allCategories = Array.from(new Set(data.map(b => b.category))).sort();
+      if (data.length > 0) {
+        this.books.set(data);
+        this.filteredBooks.set([...data]);
+
+        this.allCategories.set(
+          Array.from(new Set(data.map(b => b.category))).sort()
+        );
+
         this.resetVisibleBooks();
-        this.loading = false;
-      },
-      error: () => this.loading = false
+        this.loading.set(false);
+      }
     });
   }
 
-  openDetails(book: Book) {
+  ngOnInit() { }
+
+  // -------------------------------
+  // DETAILS
+  // -------------------------------
+  async openDetails(book: Book) {
+    this.showAddToCartDialog = false;
     this.selectedBook = null;
-    this.addToCartBook = book;
+    this.addToCartBook = null;
+
     this.quantity = 1;
     this.showDetailsDialog = true;
 
-    this.bookService.getBookById(book._id).subscribe({
-      next: (data: Book) => (this.selectedBook = data),
-      error: (err) => console.error(err),
-    });
+    this.selectedBook = await firstValueFrom(
+      this.bookService.getBookById(book._id)
+    );
   }
 
+  // -------------------------------
+  // ADD TO CART
+  // -------------------------------
   openAddToCart(book: Book) {
+    this.showDetailsDialog = false;
+    this.selectedBook = null;
+
     this.addToCartBook = book;
     this.quantity = 1;
     this.showAddToCartDialog = true;
@@ -116,9 +141,13 @@ export class Shop implements OnInit {
 
   confirmAddToCart(event: Event) {
     event.stopPropagation();
-    if (this.addToCartBook) {
-      this.cart.addToCart(this.addToCartBook, this.quantity);
+
+    let book = this.addToCartBook || this.selectedBook;
+
+    if (book) {
+      this.cart.addToCart(book, this.quantity);
     }
+
     this.showAddToCartDialog = false;
     this.showDetailsDialog = false;
 
@@ -126,77 +155,76 @@ export class Shop implements OnInit {
     this.selectedBook = null;
   }
 
-  increaseQuantity() {
-    this.quantity++;
-  }
+  increaseQuantity() { this.quantity++; }
+  decreaseQuantity() { this.quantity = Math.max(1, this.quantity - 1); }
 
-  decreaseQuantity() {
-    this.quantity = Math.max(1, this.quantity - 1);
-  }
-
-  toggleWishlist(book: Book) {
+  // -------------------------------
+  // WISHLIST
+  // -------------------------------
+  async toggleWishlist(book: Book) {
     if (!this.auth.isLoggedIn()) return;
-
-    this.wishlist.toggle(book._id).subscribe({
-      error: console.error
-    });
+    await firstValueFrom(this.wishlist.toggle(book._id));
   }
 
-  isInWishlist(bookId: string): boolean {
+  isInWishlist(bookId: string) {
     return this.wishlist.wishlistItems.includes(bookId);
   }
 
+  // -------------------------------
+  // FILTERS
+  // -------------------------------
   applyFilters() {
-    let result = [...this.books];
-
+    let result = [...this.books()];
     const q = this.searchQuery.trim().toLowerCase();
 
-    if (q !== '') {
-      result = result.filter(book =>
-        book.title.toLowerCase().includes(q) ||
-        book.author.toLowerCase().includes(q) ||
-        book.category.toLowerCase().includes(q) ||
-        (book.description ?? '').toLowerCase().includes(q)
+    if (q) {
+      result = result.filter(b =>
+        b.title.toLowerCase().includes(q) ||
+        b.author.toLowerCase().includes(q) ||
+        b.category.toLowerCase().includes(q) ||
+        (b.description ?? '').toLowerCase().includes(q)
       );
     }
 
-    if (this.selectedCategories.length > 0) {
-      result = result.filter(book =>
-        this.selectedCategories.includes(book.category)
-      );
+    const cats = this.selectedCategories;
+    if (cats.length > 0) {
+      result = result.filter(b => cats.includes(b.category));
     }
 
     if (this.selectedSort === 'priceAsc') result.sort((a, b) => a.price - b.price);
     if (this.selectedSort === 'priceDesc') result.sort((a, b) => b.price - a.price);
     if (this.selectedSort === 'newest') {
       result.sort((a, b) =>
-        new Date(b.createdAt ?? '').getTime() - new Date(a.createdAt ?? '').getTime()
+        new Date(b.createdAt ?? '').getTime() -
+        new Date(a.createdAt ?? '').getTime()
       );
     }
 
-    this.filteredBooks = result;
+    this.filteredBooks.set(result);
     this.resetVisibleBooks();
-    this.showFilters = false;
+    this.showFilters.set(false);
   }
 
   clearFilters() {
     this.selectedCategories = [];
     this.selectedSort = null;
-    this.filteredBooks = [...this.books];
+    this.filteredBooks.set([...this.books()]);
     this.resetVisibleBooks();
-    this.showFilters = false;
+    this.showFilters.set(false);
   }
 
   resetVisibleBooks() {
     this.currentIndex = this.itemsPerPage;
-    this.visibleBooks = this.filteredBooks.slice(0, this.itemsPerPage);
+    this.visibleBooks.set(
+      this.filteredBooks().slice(0, this.itemsPerPage)
+    );
   }
 
   loadMore() {
-    const nextIndex = this.currentIndex + this.itemsPerPage;
-    const nextChunk = this.filteredBooks.slice(this.currentIndex, nextIndex);
+    const next = this.currentIndex + this.itemsPerPage;
+    const nextChunk = this.filteredBooks().slice(this.currentIndex, next);
 
-    this.visibleBooks = [...this.visibleBooks, ...nextChunk];
-    this.currentIndex = nextIndex;
+    this.visibleBooks.update(v => [...v, ...nextChunk]);
+    this.currentIndex = next;
   }
 }

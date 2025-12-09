@@ -1,11 +1,12 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { MenuModule } from 'primeng/menu';
 import { MenuItem } from 'primeng/api';
-import { RouterModule, RouterLink, RouterLinkActive, Router  } from '@angular/router';
+import { RouterModule, RouterLink, Router } from '@angular/router';
 import { AuthService } from '../../auth/auth.service';
 import { CartService } from '../../services/cart.service';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-navbar',
@@ -15,26 +16,35 @@ import { CartService } from '../../services/cart.service';
   styleUrl: './navbar.scss',
 })
 export class Navbar implements OnInit {
+
   auth = inject(AuthService);
   cart = inject(CartService);
   router = inject(Router);
+
+  // Convert authState$ observable → signal
+  authState = toSignal(this.auth.authState$, { initialValue: null });
+
   isScrolled = false;
   items: MenuItem[] = [];
 
   constructor() {
     window.addEventListener('scroll', () => {
       this.isScrolled = window.scrollY > 50;
+
+      // Close PrimeNG popup menu on scroll
       const menuEl = document.querySelector('.p-menu-overlay') as HTMLElement | null;
-      if (menuEl) {
-        menuEl.style.display = 'none';
-      }
+      if (menuEl) menuEl.style.display = 'none';
+    });
+
+    // Reactively rebuild menu whenever auth state changes
+    effect(() => {
+      this.authState();
+      this.buildMenu();
     });
   }
 
   ngOnInit() {
-    this.auth.authState$.subscribe(() => {
-      this.buildMenu(); // rebuild menu whenever login/logout happens
-    });
+    this.buildMenu();
   }
 
   buildMenu() {
@@ -47,7 +57,7 @@ export class Navbar implements OnInit {
         items: [
           { label: 'Home', icon: 'pi pi-home', routerLink: '/' },
           { label: 'Shop', icon: 'pi pi-shopping-bag', routerLink: '/shop' },
-          { label: 'Contact', icon: 'pi pi-comment', routerLink: '/contact'},
+          { label: 'Contact', icon: 'pi pi-comment', routerLink: '/contact' },
           ...(isAdmin
             ? [{ label: 'Admin', icon: 'pi pi-shield', routerLink: '/admin' }]
             : [])
@@ -61,13 +71,11 @@ export class Navbar implements OnInit {
         items: [
           ...(isLogged
             ? [
-              { label: 'Wishlist', icon: 'pi pi-heart', routerLink: '/wishlist' },
-              { label: 'My Orders', icon: 'pi pi-list', routerLink: '/my-orders' },
-              { label: 'Settings', icon: 'pi pi-cog', routerLink: '/settings' },
-            ]
+                { label: 'Wishlist', icon: 'pi pi-heart', routerLink: '/wishlist' },
+                { label: 'My Orders', icon: 'pi pi-list', routerLink: '/my-orders' },
+                { label: 'Settings', icon: 'pi pi-cog', routerLink: '/settings' },
+              ]
             : []),
-
-
 
           ...(isLogged
             ? [{
@@ -98,20 +106,19 @@ export class Navbar implements OnInit {
     ];
   }
 
-    get forceSolid() {
-      const url = this.router.url;
+  get forceSolid() {
+    const url = this.router.url;
 
-      return (
-        url.startsWith('/login') ||
-        url.startsWith('/register') ||
-        url.startsWith('/admin') ||
-        url.startsWith('/settings')
-      );
-    }
-
+    return (
+      url.startsWith('/login') ||
+      url.startsWith('/register') ||
+      url.startsWith('/admin') ||
+      url.startsWith('/settings')
+    );
+  }
 
   logout() {
     this.auth.logout();
-    window.location.href = '/';   // refresh navbar instantly
+    window.location.href = '/'; // ensures navbar refresh
   }
 }

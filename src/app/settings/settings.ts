@@ -7,6 +7,7 @@ import { MessageModule } from 'primeng/message';
 
 import { UserService } from '../services/user.service';
 import { AuthService } from '../auth/auth.service';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-settings',
@@ -72,23 +73,23 @@ export class Settings implements OnInit {
   }
 
   // --- Save Profile ---
-  saveProfile() {
+  async saveProfile() {
     if (this.profileForm.invalid) {
       this.profileForm.markAllAsTouched();
       return;
     }
 
-    this.userService.updateMyProfile(this.profileForm.value).subscribe({
-      next: (res) => {
-        this.auth.saveToken(res.token);
-        alert('Profile updated successfully');
-      },
-      error: () => alert('Failed to update profile')
-    });
+    try {
+      const res = await firstValueFrom(this.userService.updateMyProfile(this.profileForm.value));
+      this.auth.saveToken(res.token);
+      alert('Profile updated successfully');
+    } catch (err) {
+      alert('Failed to update profile');
+    }
   }
 
   // --- Change Password ---
-  changePassword() {
+  async changePassword() {
     if (this.passwordForm.invalid) {
       this.passwordForm.markAllAsTouched();
       return;
@@ -96,10 +97,12 @@ export class Settings implements OnInit {
 
     const { oldPassword, newPassword } = this.passwordForm.value;
 
-    this.userService.changePassword({ oldPassword, newPassword }).subscribe({
-      next: () => alert('Password changed successfully'),
-      error: (err) => alert(err.error?.message || 'Error changing password')
-    });
+    try {
+      await firstValueFrom(this.userService.changePassword({ oldPassword, newPassword }));
+      alert('Password changed successfully');
+    } catch (err: any) {
+      alert(err.error?.message || 'Error changing password');
+    }
   }
 
   // Getters for template

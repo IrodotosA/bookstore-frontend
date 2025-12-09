@@ -1,11 +1,12 @@
-import { Component, signal, inject } from '@angular/core';
+import { Component, signal, inject, OnInit } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { Navbar } from './shared/navbar/navbar';
 import { Footer } from './shared/footer/footer';
 import { CommonModule } from '@angular/common';
 import { WishlistService } from './services/wishlist.service';
 import { AuthService } from './auth/auth.service';
-
+import { toSignal } from '@angular/core/rxjs-interop';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -14,16 +15,25 @@ import { AuthService } from './auth/auth.service';
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
-export class App {
+export class App implements OnInit {
+
   protected readonly title = signal('bookstore-frontend');
+
   router = inject(Router);
   wishlist = inject(WishlistService);
   auth = inject(AuthService);
 
-  ngOnInit() {
+  // Convert wishlist observable → signal
+  wishlistItems = toSignal(this.wishlist.wishlist$, { initialValue: [] });
+
+  async ngOnInit() {
     // Load wishlist ONLY if logged in
     if (this.auth.isLoggedIn()) {
-      this.wishlist.loadWishlist().subscribe();
+      try {
+        await firstValueFrom(this.wishlist.loadWishlist());
+      } catch (err) {
+        console.error('Failed to load wishlist:', err);
+      }
     }
   }
 

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, inject, effect } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
@@ -7,6 +7,8 @@ import { InputTextModule } from 'primeng/inputtext';
 import { FormsModule } from '@angular/forms';
 import { ContactService } from '../../services/contact.service';
 import { Message } from '../../models/message.model';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-admin-messages',
@@ -23,33 +25,33 @@ import { Message } from '../../models/message.model';
   templateUrl: './messages.html',
   styleUrls: ['./messages.scss']
 })
-export class AdminMessages implements OnInit {
+export class AdminMessages {
 
   private contactService = inject(ContactService);
 
+  // Reactive state
   messages: Message[] = [];
   filteredMessages: Message[] = [];
   expandedRows: Record<string, boolean> = {};
   searchTerm = '';
   loading = true;
 
-  ngOnInit() {
-    this.loadMessages();
-  }
+  // Load messages using toSignal
+  private messagesSig = toSignal(
+    this.contactService.getMessages(),
+    { initialValue: [] }
+  );
 
-  loadMessages() {
-    this.loading = true;
+  constructor() {
+    effect(() => {
+      const data = this.messagesSig();
 
-    this.contactService.getMessages().subscribe({
-      next: (data: Message[]) => {
-        this.messages = data;
-        this.filteredMessages = data;
-        this.loading = false;
-      },
-      error: () => {
-        alert('Failed to load messages.');
-        this.loading = false;
-      }
+      // initialValue = [] → avoid triggering while loading
+      if (!Array.isArray(data)) return;
+
+      this.messages = data;
+      this.filteredMessages = [...data];
+      this.loading = false;
     });
   }
 
@@ -76,15 +78,19 @@ export class AdminMessages implements OnInit {
     this.expandedRows = {};
   }
 
-  deleteMessage(msg: Message) {
+  async deleteMessage(msg: Message) {
     if (!confirm(`Delete message from "${msg.name}"?`)) return;
 
-    this.contactService.deleteMessage(msg._id).subscribe({
-      next: () => {
-        this.messages = this.messages.filter(m => m._id !== msg._id);
-        this.filteredMessages = this.filteredMessages.filter(m => m._id !== msg._id);
-      },
-      error: () => alert('Failed to delete message.')
-    });
+    try {
+      await firstValueFrom(this.contactService.deleteMessage(msg._id));
+
+      // Update local state
+      this.messages = this.messages.filter(m => m._id !== msg._id);
+      this.filteredMessages = this.filteredMessages.filter(m => m._id !== msg._id);
+
+      delete this.expandedRows[msg._id];
+    } catch {
+      alert('Failed to delete message.');
+    }
   }
 }

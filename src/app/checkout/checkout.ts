@@ -1,9 +1,18 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, Validators, FormGroup, FormArray, AbstractControl, ValidationErrors } from '@angular/forms';
+import {
+  ReactiveFormsModule,
+  FormBuilder,
+  Validators,
+  FormGroup,
+  AbstractControl,
+  ValidationErrors
+} from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { MessageModule } from 'primeng/message';
+import { firstValueFrom } from 'rxjs';
+
 import { CartService } from '../services/cart.service';
 import { OrderService } from '../services/order.service';
 import { Router } from '@angular/router';
@@ -64,7 +73,6 @@ export class Checkout {
   cardValidator() {
     return (group: AbstractControl): ValidationErrors | null => {
       const payMethod = group.get('paymentMethod')?.value;
-
       if (payMethod !== 'card') return null;
 
       const number = group.get('card.number')?.value?.trim();
@@ -87,20 +95,16 @@ export class Checkout {
           c.cvv === cvv
       );
 
-      if (!match) {
-        return { invalidCard: true };
-      }
-
-      return null;
+      return match ? null : { invalidCard: true };
     };
   }
 
-  // Getters for clean template use
+  // Getters
   get f() { return this.checkoutForm; }
   get customer() { return this.f.get('customer') as FormGroup; }
   get card() { return this.f.get('card') as FormGroup; }
 
-  placeOrder() {
+  async placeOrder() {
     if (this.checkoutForm.invalid) {
       this.checkoutForm.markAllAsTouched();
       return;
@@ -121,13 +125,14 @@ export class Checkout {
       cardNumber: data.card.number // backend extracts last 4
     };
 
-    this.orderService.createOrder(orderData).subscribe({
-      next: () => {
-        this.cart.clearCart();
-        this.router.navigate(['/order-success']);
-      },
-      error: () => alert("Order failed.")
-    });
+    try {
+      await firstValueFrom(this.orderService.createOrder(orderData));
+      this.cart.clearCart();
+      this.router.navigate(['/order-success']);
+
+    } catch (err) {
+      alert("Order failed.");
+    }
   }
 
   get items() {

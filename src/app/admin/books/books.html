@@ -6,7 +6,8 @@
       pInputText
       placeholder="Search by title, author or category..."
       [(ngModel)]="searchTerm"
-      (input)="filterBooks()"
+      (input)="filterBooks()
+      "
       class="toolbar-input"
     />
 
@@ -27,9 +28,10 @@
     [rows]="10"
     [rowsPerPageOptions]="[5, 10, 25, 50]"
     [expandedRowKeys]="expandedRows"
-    (onRowExpand)="onRowExpand($event)"
-    (onRowCollapse)="onRowCollapse($event)"
   >
+    <!-- (onRowExpand)="onRowExpand($event)"
+    (onRowCollapse)="onRowCollapse($event)" -->
+
     <!-- CAPTION (toolbar for expand/collapse all) -->
     <ng-template #caption>
       <div class="flex justify-end gap-2">
@@ -167,43 +169,47 @@
         />
 
         <!-- Preview -->
-        <img
-          *ngIf="previewImage"
-          [src]="previewImage"
-          width="120"
-          height="160"
-          style="object-fit: cover; margin-top: 10px;"
-        />
+        @if (previewImage) {
+          <img
+            [src]="previewImage"
+            width="120"
+            height="160"
+            style="object-fit: cover; margin-top: 10px;"
+          />
+        }
       </div>
 
       <div class="field">
         <label>Title</label>
         <input pInputText formControlName="title" />
-        <p-message
-          *ngIf="bookForm.get('title')?.touched && bookForm.get('title')?.hasError('required')"
-          severity="error"
-          text="Title is required"
-        ></p-message>
+        @if (bookForm.get('title')?.touched && bookForm.get('title')?.hasError('required')) {
+          <p-message
+            severity="error"
+            text="Title is required"
+          ></p-message>
+        }
       </div>
 
       <div class="field">
         <label>Author</label>
         <input pInputText formControlName="author" />
-        <p-message
-          *ngIf="bookForm.get('author')?.touched && bookForm.get('author')?.hasError('required')"
-          severity="error"
-          text="Author is required"
-        ></p-message>
+        @if (bookForm.get('author')?.touched && bookForm.get('author')?.hasError('required')) {
+          <p-message
+            severity="error"
+            text="Author is required"
+          ></p-message>
+        }
       </div>
 
       <div class="field">
         <label>Category</label>
         <input pInputText formControlName="category" />
-        <p-message
-          *ngIf="bookForm.get('category')?.touched && bookForm.get('category')?.hasError('required')"
-          severity="error"
-          text="Category is required"
-        ></p-message>
+        @if (bookForm.get('category')?.touched && bookForm.get('category')?.hasError('required')) {
+          <p-message
+            severity="error"
+            text="Category is required"
+          ></p-message>
+        }
       </div>
 
       <div class="field">
@@ -215,23 +221,25 @@
           (onBlur)="bookForm.get('price')?.markAsTouched()"
         ></p-inputNumber>
 
-        <p-message
-          *ngIf="
-            bookForm.get('price')?.touched &&
-            bookForm.get('price')?.hasError('required')
-          "
-          severity="error"
-          text="Price is required"
-        ></p-message>
+        @if (
+          bookForm.get('price')?.touched &&
+          bookForm.get('price')?.hasError('required')
+        ) {
+          <p-message
+            severity="error"
+            text="Price is required"
+          ></p-message>
+        }
 
-        <p-message
-          *ngIf="
-            bookForm.get('price')?.touched &&
-            bookForm.get('price')?.hasError('min')
-          "
-          severity="error"
-          text="Price must be greater than 0"
-        ></p-message>
+        @if (
+          bookForm.get('price')?.touched &&
+          bookForm.get('price')?.hasError('min')
+        ) {
+          <p-message
+            severity="error"
+            text="Price must be greater than 0"
+          ></p-message>
+        }
       </div>
 
       <div class="field">

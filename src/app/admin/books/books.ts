@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, effect } from '@angular/core';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
@@ -18,6 +18,8 @@ import {
 import { BookService } from '../../services/book.service';
 import { environment } from '../../../environments/environment';
 import { Book } from '../../models/book.model';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-admin-books',
@@ -45,6 +47,7 @@ export class AdminBooks implements OnInit {
 
   apiUrl = environment.apiUrl;
 
+  // Local state (plain arrays for simplicity)
   books: Book[] = [];
   filteredBooks: Book[] = [];
 
@@ -63,9 +66,23 @@ export class AdminBooks implements OnInit {
   // Reactive form for book create/edit
   bookForm!: FormGroup;
 
+  // toSignal for loading all books once
+  private booksSignal = toSignal(this.bookService.getAllBooks(), {
+    initialValue: [] as Book[]
+  });
+
+  // Effect to sync signal → local state + loading flag
+  private booksEffect = effect(() => {
+    this.loading = true;
+    const data = this.booksSignal();
+    this.books = data;
+    this.filteredBooks = [...data];
+    this.loading = false;
+  });
+
   ngOnInit() {
     this.initForm();
-    this.loadBooks();
+    // no loadBooks() needed, effect + toSignal handles initial load
   }
 
   private initForm() {
@@ -73,26 +90,8 @@ export class AdminBooks implements OnInit {
       title: ['', Validators.required],
       author: ['', Validators.required],
       category: ['', Validators.required],
-      price: [
-        0,
-        [Validators.required, Validators.min(0.01)]
-      ],
+      price: [0, [Validators.required, Validators.min(0.01)]],
       description: ['']
-    });
-  }
-
-  loadBooks() {
-    this.loading = true;
-    this.bookService.getAllBooks().subscribe({
-      next: (data: Book[]) => {
-        this.books = data;
-        this.filteredBooks = data;
-        this.loading = false;
-      },
-      error: (err) => {
-        console.error(err);
-        this.loading = false;
-      }
     });
   }
 
@@ -100,7 +99,9 @@ export class AdminBooks implements OnInit {
     this.selectedFile = null;
     this.previewImage = null;
 
-    const fileInput = document.getElementById('book-image-input') as HTMLInputElement | null;
+    const fileInput = document.getElementById(
+      'book-image-input'
+    ) as HTMLInputElement | null;
     if (fileInput) fileInput.value = '';
   }
 
@@ -108,9 +109,9 @@ export class AdminBooks implements OnInit {
     const term = this.searchTerm.toLowerCase().trim();
 
     this.filteredBooks = this.books.filter((b) =>
-      b.title?.toLowerCase().includes(term) ||
-      b.author?.toLowerCase().includes(term) ||
-      b.category?.toLowerCase().includes(term)
+      (b.title ?? '').toLowerCase().includes(term) ||
+      (b.author ?? '').toLowerCase().includes(term) ||
+      (b.category ?? '').toLowerCase().includes(term)
     );
 
     this.expandedRows = {};
@@ -127,13 +128,13 @@ export class AdminBooks implements OnInit {
     this.expandedRows = {};
   }
 
-  onRowExpand(event: { data: Book }) {
-    console.log('Expanded:', event.data);
-  }
+  // onRowExpand(event: { data: Book }) {
+  //   console.log('Expanded:', event.data);
+  // }
 
-  onRowCollapse(event: { data: Book }) {
-    console.log('Collapsed:', event.data);
-  }
+  // onRowCollapse(event: { data: Book }) {
+  //   console.log('Collapsed:', event.data);
+  // }
 
   openNew() {
     this.isEditMode = false;
@@ -179,35 +180,35 @@ export class AdminBooks implements OnInit {
     reader.readAsDataURL(file);
   }
 
-  toggleFeatured(book: Book) {
-    this.bookService.updateFeatured(book._id, !book.featured).subscribe({
-      next: (updated: Book) => {
-        book.featured = updated.featured;
-      },
-      error: (err) => {
-        console.error(err);
-        alert('Failed to update featured status');
-      }
-    });
+  // Pessimistic update: wait for server, then update UI
+  async toggleFeatured(book: Book) {
+    try {
+      const updated = await firstValueFrom(
+        this.bookService.updateFeatured(book._id, !book.featured)
+      );
+      book.featured = updated.featured;
+    } catch (err) {
+      console.error(err);
+      alert('Failed to update featured status');
+    }
   }
 
-  deleteBook(book: Book) {
+  async deleteBook(book: Book) {
     if (!confirm(`Delete book "${book.title}"?`)) return;
 
-    this.bookService.deleteBook(book._id).subscribe({
-      next: () => {
-        this.books = this.books.filter((b) => b._id !== book._id);
-        this.filteredBooks = this.filteredBooks.filter((b) => b._id !== book._id);
-        delete this.expandedRows[book._id];
-      },
-      error: (err) => {
-        console.error(err);
-        alert('Failed to delete book');
-      }
-    });
+    try {
+      await firstValueFrom(this.bookService.deleteBook(book._id));
+
+      this.books = this.books.filter((b) => b._id !== book._id);
+      this.filteredBooks = this.filteredBooks.filter((b) => b._id !== book._id);
+      delete this.expandedRows[book._id];
+    } catch (err) {
+      console.error(err);
+      alert('Failed to delete book');
+    }
   }
 
-  saveBook() {
+  async saveBook() {
     if (this.bookForm.invalid) {
       this.bookForm.markAllAsTouched();
       return;
@@ -226,34 +227,43 @@ export class AdminBooks implements OnInit {
       fd.append('image', this.selectedFile);
     }
 
-    // UPDATE
-    if (this.isEditMode && this.selectedBook) {
-      this.bookService.updateBook(this.selectedBook._id, fd).subscribe({
-        next: (updated: Book) => {
-          const idx = this.books.findIndex(b => b._id === this.selectedBook!._id);
-          if (idx !== -1) this.books[idx] = updated;
+    try {
+      // UPDATE
+      if (this.isEditMode && this.selectedBook) {
+        const updated = await firstValueFrom(
+          this.bookService.updateBook(this.selectedBook._id, fd)
+        );
 
-          this.resetFormState();
-          this.bookForm.reset();
-          this.bookDialog = false;
-        },
-        error: () => alert('Failed to update book')
-      });
-    }
+        const idx = this.books.findIndex(
+          (b) => b._id === this.selectedBook!._id
+        );
+        if (idx !== -1) {
+          this.books[idx] = updated;
+        }
 
-    // CREATE
-    else {
-      this.bookService.createBook(fd).subscribe({
-        next: (created: Book) => {
-          this.books.unshift(created);
-          this.filteredBooks = [...this.books];
+        this.resetFormState();
+        this.bookForm.reset();
+        this.bookDialog = false;
+      }
 
-          this.resetFormState();
-          this.bookForm.reset();
-          this.bookDialog = false;
-        },
-        error: () => alert('Failed to create book')
-      });
+      // CREATE
+      else {
+        const created = await firstValueFrom(this.bookService.createBook(fd));
+
+        this.books.unshift(created);
+        this.filteredBooks = [...this.books];
+
+        this.resetFormState();
+        this.bookForm.reset();
+        this.bookDialog = false;
+      }
+    } catch (err) {
+      console.error(err);
+      alert(
+        this.isEditMode
+          ? 'Failed to update book'
+          : 'Failed to create book'
+      );
     }
   }
 

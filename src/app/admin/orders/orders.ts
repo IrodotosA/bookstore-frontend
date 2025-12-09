@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, inject, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import {
@@ -30,6 +30,9 @@ import { FormsModule } from '@angular/forms';
 import { OrderService } from '../../services/order.service';
 import { Order, OrderItem, OrderStatus, PaymentMethod } from '../../models/order.model';
 
+import { toSignal } from '@angular/core/rxjs-interop';
+import { firstValueFrom } from 'rxjs';
+
 @Component({
   selector: 'app-admin-orders',
   standalone: true,
@@ -49,7 +52,7 @@ import { Order, OrderItem, OrderStatus, PaymentMethod } from '../../models/order
   templateUrl: './orders.html',
   styleUrl: './orders.scss'
 })
-export class AdminOrders implements OnInit {
+export class AdminOrders {
 
   private fb = inject(FormBuilder);
   private orderService = inject(OrderService);
@@ -57,32 +60,46 @@ export class AdminOrders implements OnInit {
   selectedOrder: Order | null = null;
   orders: Order[] = [];
   filteredOrders: Order[] = [];
-
   loading = true;
-  searchTerm: string = '';
 
+  searchTerm = '';
   expandedRows: Record<string, boolean> = {};
   orderDialog = false;
 
-  // REACTIVE FORM
   orderForm!: FormGroup;
 
-  paymentMethods: { label: string; value: PaymentMethod }[] = [
+  paymentMethods = [
     { label: 'Credit Card', value: 'card' },
     { label: 'Cash on Delivery', value: 'cod' },
     { label: 'PayPal', value: 'paypal' }
   ];
 
-  statuses: { label: string; value: OrderStatus }[] = [
+  statuses = [
     { label: 'Pending', value: 'pending' },
     { label: 'Shipped', value: 'shipped' },
     { label: 'Completed', value: 'completed' },
     { label: 'Canceled', value: 'canceled' }
   ];
 
-  ngOnInit() {
-    this.loadOrders();
+  // Load all orders using a signal
+  private ordersSig = toSignal(
+    this.orderService.getAllOrders(),
+    { initialValue: [] }
+  );
+
+  constructor() {
     this.initEmptyForm();
+
+    // Auto-update local state when signal changes
+    effect(() => {
+      const data = this.ordersSig();
+
+      if (!Array.isArray(data)) return;
+
+      this.orders = data;
+      this.filteredOrders = [...data];
+      this.loading = false;
+    });
   }
 
   // -----------------------------
@@ -99,9 +116,11 @@ export class AdminOrders implements OnInit {
         postalCode: ['', Validators.required],
         country: ['', Validators.required]
       }),
+
       items: this.fb.array([], {
         validators: [AdminOrders.atLeastOneItem()]
       }),
+
       paymentMethod: ['', Validators.required],
       status: ['', Validators.required],
       totalPrice: [0]
@@ -119,7 +138,7 @@ export class AdminOrders implements OnInit {
     return this.orderForm.get('billing') as FormGroup;
   }
 
-  get itemsArray(): FormArray {
+  get itemsArray() {
     return this.orderForm.get('items') as FormArray;
   }
 
@@ -128,20 +147,6 @@ export class AdminOrders implements OnInit {
       title: [item?.title || '', Validators.required],
       quantity: [item?.quantity || 1, [Validators.required, Validators.min(1)]],
       price: [item?.price || 0, [Validators.required, Validators.min(0)]]
-    });
-  }
-
-  // -----------------------------
-  // LOAD ORDERS
-  // -----------------------------
-  loadOrders() {
-    this.orderService.getAllOrders().subscribe({
-      next: (data: Order[]) => {
-        this.orders = data;
-        this.filteredOrders = data;
-        this.loading = false;
-      },
-      error: (err) => console.error(err)
     });
   }
 
@@ -220,19 +225,22 @@ export class AdminOrders implements OnInit {
   // -----------------------------
   // SAVE ORDER
   // -----------------------------
-  saveOrder() {
+  async saveOrder() {
     if (!this.selectedOrder) return;
 
-    this.orderService
-      .updateOrderFull(this.selectedOrder._id, this.orderForm.value)
-      .subscribe({
-        next: (updated: Order) => {
-          const idx = this.orders.findIndex(o => o._id === updated._id);
-          if (idx !== -1) this.orders[idx] = updated;
-          this.orderDialog = false;
-        },
-        error: (err) => console.error(err)
-      });
+    try {
+      const updated = await firstValueFrom(
+        this.orderService.updateOrderFull(this.selectedOrder._id, this.orderForm.value)
+      );
+
+      const idx = this.orders.findIndex(o => o._id === updated._id);
+      if (idx !== -1) this.orders[idx] = updated;
+
+      this.filteredOrders = [...this.orders];
+      this.orderDialog = false;
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   hideDialog() {
@@ -255,16 +263,18 @@ export class AdminOrders implements OnInit {
   // -----------------------------
   // DELETE ORDER
   // -----------------------------
-  deleteOrder(order: Order) {
+  async deleteOrder(order: Order) {
     if (!confirm('Delete this order?')) return;
 
-    this.orderService.deleteOrder(order._id).subscribe({
-      next: () => {
-        this.orders = this.orders.filter(o => o._id !== order._id);
-        this.filteredOrders = this.filteredOrders.filter(o => o._id !== order._id);
-        delete this.expandedRows[order._id];
-      },
-      error: (err) => console.error(err)
-    });
+    try {
+      await firstValueFrom(this.orderService.deleteOrder(order._id));
+
+      this.orders = this.orders.filter(o => o._id !== order._id);
+      this.filteredOrders = this.filteredOrders.filter(o => o._id !== order._id);
+      delete this.expandedRows[order._id];
+
+    } catch (err) {
+      console.error(err);
+    }
   }
 }

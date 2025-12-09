@@ -8,131 +8,140 @@
 
 <div class="wishlist-page">
 
-    <div class="wishlist-search" *ngIf="books.length > 0">
-        <p-iconfield iconPosition="left" class="w-full md:w-6">
-            <p-inputicon>
-            <i class="pi pi-search"></i>
-            </p-inputicon>
+  @if (books.length > 0) {
+    <div class="wishlist-search">
+      <p-iconfield iconPosition="left" class="w-full md:w-6">
+        <p-inputicon>
+          <i class="pi pi-search"></i>
+        </p-inputicon>
 
-            <input
-            pInputText
-            type="text"
-            placeholder="Search wishlist..."
-            class="w-full"
-            [(ngModel)]="searchQuery"
-            (input)="applySearch()"
-            />
-        </p-iconfield>
+        <input
+          pInputText
+          type="text"
+          placeholder="Search wishlist..."
+          class="w-full"
+          [(ngModel)]="searchQuery"
+          (input)="applySearch()"
+        />
+      </p-iconfield>
 
-        <!-- EMPTY WISHLIST BUTTON -->
-        <button
-          pButton
-          label="Empty Wishlist"
-          icon="pi pi-trash"
-          class="p-button-danger ml-3"
-          (click)="emptyWishlist()">
-        </button>
+      <!-- EMPTY WISHLIST BUTTON -->
+      <button
+        pButton
+        label="Empty Wishlist"
+        icon="pi pi-trash"
+        class="p-button-danger ml-3"
+        (click)="emptyWishlist()">
+      </button>
     </div>
+  }
 
   <!-- Empty -->
-  <div *ngIf="!loading && books.length === 0" class="empty-box">
-    <h2>Your wishlist is empty</h2>
-    <p>Looks like you haven't saved any books yet.</p>
+  @if (!loading && books.length === 0) {
+    <div class="empty-box">
+      <h2>Your wishlist is empty</h2>
+      <p>Looks like you haven't saved any books yet.</p>
 
-    <button 
-      pButton 
-      label="Browse Books"
-      class="shop-more-btn mt-3"
-      (click)="goToShop()">
-    </button>
-  </div>
+      <button
+        pButton
+        label="Browse Books"
+        class="shop-more-btn mt-3"
+        (click)="goToShop()">
+      </button>
+    </div>
+  }
 
   <!-- Wishlist Grid -->
-  <div class="grid p-3" *ngIf="books.length > 0">
-    <div class="col-12 md:col-6 lg:col-4" *ngFor="let book of filteredBooks">
+  @if (books.length > 0) {
+    <div class="grid p-3">
+      @for (book of filteredBooks; track book._id) {
+        <div class="col-12 md:col-6 lg:col-4">
+          <div class="card-wrapper">
+            <p-card styleClass="h-full">
 
-      <div class="card-wrapper">
-      <p-card styleClass="h-full">
+              <!-- HEART -->
+              <div class="wishlist-heart" (click)="toggleWishlist(book)">
+                <i
+                  class="pi"
+                  [ngClass]="isInWishlist(book._id) ? 'pi-heart-fill filled' : 'pi-heart'">
+                </i>
+              </div>
 
-        <!-- HEART -->
-        <div class="wishlist-heart" (click)="toggleWishlist(book)">
-          <i class="pi"
-             [ngClass]="isInWishlist(book._id) ? 'pi-heart-fill filled' : 'pi-heart'">
-          </i>
-        </div>
+              <!-- IMAGE -->
+              <img
+                [src]="apiUrl + book.imageUrl"
+                [alt]="book.title"
+                class="w-full h-15rem object-cover mb-3" />
 
-        <!-- IMAGE -->
-        <img 
-          [src]="apiUrl + book.imageUrl"
-          [alt]="book.title"
-          class="w-full h-15rem object-cover mb-3"/>
+              <ng-template pTemplate="title">
+                {{ book.title }}
+              </ng-template>
 
-        <ng-template pTemplate="title">
-          {{ book.title }}
-        </ng-template>
+              <ng-template pTemplate="subtitle">
+                €{{ book.price }}
+              </ng-template>
 
-        <ng-template pTemplate="subtitle">
-          €{{ book.price }}
-        </ng-template>
+              <ng-template pTemplate="content">
+                <p class="book-author">Author: {{ book.author }}</p>
+                <p class="book-category">Category: {{ book.category }}</p>
+              </ng-template>
 
-        <ng-template pTemplate="content">
-          <p class="book-author">Author: {{ book.author }}</p>
-          <p class="book-category">Category: {{ book.category }}</p>
-        </ng-template>
+              <ng-template pTemplate="footer">
+                <div class="wishlist-actions">
+                  <button
+                    pButton
+                    label="Add to Cart"
+                    icon="pi pi-shopping-cart"
+                    class="shop-more-btn"
+                    (click)="openAddToCart(book)">
+                  </button>
 
-        <ng-template pTemplate="footer">
-          <div class="wishlist-actions">
-            <button 
-              pButton
-              label="Add to Cart"
-              icon="pi pi-shopping-cart"
-              class="shop-more-btn"
-              (click)="openAddToCart(book)">
-            </button>
+                  <button
+                    pButton
+                    label="Details"
+                    class="p-button-text"
+                    (click)="openDetails(book)">
+                  </button>
+                </div>
 
-              <button 
-                pButton
-                label="Details"
-                class="p-button-text"
-                (click)="openDetails(book)">
-            </button>
+                <!-- REMOVE BELOW -->
+                <button
+                  pButton
+                  label="Remove"
+                  icon="pi pi-times"
+                  class="p-button-danger p-button-text remove-btn-under"
+                  (click)="remove(book)">
+                </button>
+              </ng-template>
+
+            </p-card>
           </div>
-
-          <!-- REMOVE BELOW -->
-          <button 
-            pButton
-            label="Remove"
-            icon="pi pi-times"
-            class="p-button-danger p-button-text remove-btn-under"
-            (click)="remove(book)">
-          </button>
-        </ng-template>
-
-      </p-card>
-      </div>
-
+        </div>
+      }
     </div>
-  </div>
+  }
 
   <!-- DETAILS DIALOG -->
-    <p-dialog 
-    [(visible)]="showDetailsDialog" 
+  <p-dialog
+    [(visible)]="showDetailsDialog"
     [modal]="true"
     header="Book Details"
     [style]="{ width: '400px' }"
     [closable]="true">
 
     <!-- Loading -->
-    <div *ngIf="!selectedBook">
+    @if (!selectedBook) {
+      <div>
         <p>Loading details...</p>
-    </div>
+      </div>
+    }
 
     <!-- Details content -->
-    <div *ngIf="selectedBook">
-
-        <img 
-        [src]="apiUrl + selectedBook.imageUrl"
-        class="w-full mb-3 border-round" />
+    @if (selectedBook) {
+      <div>
+        <img
+          [src]="apiUrl + selectedBook.imageUrl"
+          class="w-full mb-3 border-round" />
 
         <h2>{{ selectedBook.title }}</h2>
 
@@ -144,39 +153,37 @@
 
         <!-- Quantity -->
         <div class="flex align-items-center gap-3 mt-4">
-        <label>Quantity:</label>
+          <label>Quantity:</label>
 
-        <button 
-            pButton 
-            icon="pi pi-minus" 
+          <button
+            pButton
+            icon="pi pi-minus"
             (click)="decreaseQuantity()">
-        </button>
+          </button>
 
-        <p-inputNumber 
+          <p-inputNumber
             [(ngModel)]="quantity"
             [min]="1"
             inputStyleClass="w-3rem text-center">
-        </p-inputNumber>
+          </p-inputNumber>
 
-        <button 
-            pButton 
-            icon="pi pi-plus" 
+          <button
+            pButton
+            icon="pi pi-plus"
             (click)="increaseQuantity()">
-        </button>
+          </button>
         </div>
 
-        <button 
-        pButton 
-        label="Add to Cart"
-        icon="pi pi-shopping-cart"
-        class="mt-4 w-full"
-        (click)="confirmAddToCart($event)">
+        <button
+          pButton
+          label="Add to Cart"
+          icon="pi pi-shopping-cart"
+          class="mt-4 w-full"
+          (click)="confirmAddToCart($event)">
         </button>
-
-    </div>
-
-    </p-dialog>
-
+      </div>
+    }
+  </p-dialog>
 
   <!-- ADD TO CART DIALOG -->
   <p-dialog
@@ -186,40 +193,40 @@
     [style]="{ width: '350px' }"
     [closable]="true">
 
-    <div *ngIf="addToCartBook">
+    @if (addToCartBook) {
+      <div>
+        <h2 class="mb-2">{{ addToCartBook.title }}</h2>
+        <p><strong>Price:</strong> €{{ addToCartBook.price }}</p>
 
-      <h2 class="mb-2">{{ addToCartBook.title }}</h2>
-      <p><strong>Price:</strong> €{{ addToCartBook.price }}</p>
+        <div class="flex align-items-center gap-3 mt-3">
+          <button pButton icon="pi pi-minus" (click)="decreaseQuantity()"></button>
 
-      <div class="flex align-items-center gap-3 mt-3">
-        <button pButton icon="pi pi-minus" (click)="decreaseQuantity()"></button>
+          <p-inputNumber
+            [(ngModel)]="quantity"
+            [min]="1"
+            inputStyleClass="w-3rem text-center">
+          </p-inputNumber>
 
-        <p-inputNumber 
-          [(ngModel)]="quantity"
-          [min]="1"
-          inputStyleClass="w-3rem text-center">
-        </p-inputNumber>
+          <button pButton icon="pi pi-plus" (click)="increaseQuantity()"></button>
+        </div>
 
-        <button pButton icon="pi pi-plus" (click)="increaseQuantity()"></button>
+        <div class="flex justify-content-end gap-2 mt-4">
+          <button
+            pButton
+            label="Cancel"
+            class="p-button-secondary"
+            (click)="showAddToCartDialog = false">
+          </button>
+
+          <button
+            pButton
+            label="Add"
+            icon="pi pi-check"
+            (click)="confirmAddToCart($event)">
+          </button>
+        </div>
       </div>
-
-      <div class="flex justify-content-end gap-2 mt-4">
-        <button 
-          pButton 
-          label="Cancel"
-          class="p-button-secondary"
-          (click)="showAddToCartDialog = false">
-        </button>
-
-        <button 
-          pButton 
-          label="Add"
-          icon="pi pi-check"
-          (click)="confirmAddToCart($event)">
-        </button>
-      </div>
-
-    </div>
+    }
   </p-dialog>
 
 </div>

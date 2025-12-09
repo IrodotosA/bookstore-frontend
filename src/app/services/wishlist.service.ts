@@ -88,9 +88,16 @@ export class WishlistService {
     );
   }
 
-  clearAll(): Observable<boolean> {
-    this.wishlistItems = [];
-    this._wishlist$.next([]);
-    return of(true);
+  clearAll(): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(
+      `${this.apiUrl}/clear`,
+      { headers: this.getAuthHeaders() }
+    ).pipe(
+      tap(() => {
+        // Update local state to empty
+        this.wishlistItems = [];
+        this._wishlist$.next([]);
+      })
+    );
   }
 }

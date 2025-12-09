@@ -9,6 +9,7 @@ import { ButtonModule } from 'primeng/button';
 import { Router, RouterModule } from '@angular/router';
 
 import { Order } from '../models/order.model';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-my-orders',
@@ -26,6 +27,7 @@ import { Order } from '../models/order.model';
   styleUrl: './my-orders.scss'
 })
 export class MyOrders implements OnInit {
+  
   private orderService = inject(OrderService);
   private auth = inject(AuthService);
   private router = inject(Router);
@@ -33,7 +35,7 @@ export class MyOrders implements OnInit {
   orders: Order[] = [];
   loading = true;
 
-  ngOnInit() {
+  async ngOnInit() {
     if (!this.auth.isLoggedIn()) {
       this.router.navigate(['/login'], {
         queryParams: { redirectTo: '/my-orders' }
@@ -41,16 +43,13 @@ export class MyOrders implements OnInit {
       return;
     }
 
-    this.orderService.getMyOrders().subscribe({
-      next: (res: Order[]) => {
-        this.orders = res;
-        this.loading = false;
-      },
-      error: (err) => {
-        console.error(err);
-        this.loading = false;
-      }
-    });
+    try {
+      this.orders = await firstValueFrom(this.orderService.getMyOrders());
+    } catch (err) {
+      console.error(err);
+    } finally {
+      this.loading = false;
+    }
   }
 
   getStatusSeverity(status: Order['status']) {
@@ -63,18 +62,18 @@ export class MyOrders implements OnInit {
     }
   }
 
-  cancel(orderId: string) {
+  async cancel(orderId: string) {
     if (!confirm('Are you sure you want to cancel this order?')) return;
 
-    this.orderService.cancelOrder(orderId).subscribe({
-      next: (updated: Order) => {
-        const order = this.orders.find(o => o._id === updated._id);
-        if (order) order.status = updated.status;
-      },
-      error: (err) => {
-        console.error(err);
-        alert('Failed to cancel order.');
-      }
-    });
+    try {
+      const updated = await firstValueFrom(this.orderService.cancelOrder(orderId));
+
+      const order = this.orders.find(o => o._id === updated._id);
+      if (order) order.status = updated.status;
+
+    } catch (err) {
+      console.error(err);
+      alert('Failed to cancel order.');
+    }
   }
 }

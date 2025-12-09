@@ -14,6 +14,7 @@ import { BookService } from '../services/book.service';
 import { CartService } from '../services/cart.service';
 
 import { Book } from '../models/book.model';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-home',
@@ -50,24 +51,20 @@ export class Home implements OnInit {
   private cart = inject(CartService);
   private bookService = inject(BookService);
 
-  ngOnInit() {
+  async ngOnInit() {
     this.updateIsMobile();
-
     window.addEventListener('resize', () => this.updateIsMobile());
 
-    // Newest books
-    this.bookService.getNewestBooks().subscribe({
-      next: (data: Book[]) => {
-        this.books = data;
-      }
-    });
+    try {
+      // Load newest books
+      this.books = await firstValueFrom(this.bookService.getNewestBooks());
 
-    // Featured books
-    this.bookService.getFeaturedBooks().subscribe({
-      next: (data: Book[]) => {
-        this.featured = data;
-      }
-    });
+      // Load featured books
+      this.featured = await firstValueFrom(this.bookService.getFeaturedBooks());
+
+    } catch (err) {
+      console.error('Error loading home page books', err);
+    }
   }
 
   updateIsMobile() {
@@ -79,16 +76,19 @@ export class Home implements OnInit {
     { breakpoint: '1024px', numVisible: 2, numScroll: 1 }
   ];
 
-  openDetails(book: Book) {
+  async openDetails(book: Book) {
     this.selectedBook = null;
     this.addToCartBook = book;
     this.quantity = 1;
     this.showDetailsDialog = true;
 
-    this.bookService.getBookById(book._id).subscribe({
-      next: (data: Book) => (this.selectedBook = data),
-      error: (err) => console.error(err),
-    });
+    try {
+      this.selectedBook = await firstValueFrom(
+        this.bookService.getBookById(book._id)
+      );
+    } catch (err) {
+      console.error('Error loading book details', err);
+    }
   }
 
   openAddToCart(book: Book) {
@@ -110,7 +110,6 @@ export class Home implements OnInit {
 
     if (!this.addToCartBook) return;
 
-    // CartService is typed: accepts book+quantity
     this.cart.addToCart(this.addToCartBook, this.quantity);
 
     this.showAddToCartDialog = false;

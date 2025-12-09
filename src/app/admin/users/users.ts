@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, inject, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
@@ -17,6 +17,9 @@ import { MessageModule } from 'primeng/message';
 import { UserService } from '../../services/user.service';
 import { User, UserRole } from '../../models/user.model';
 
+import { toSignal } from '@angular/core/rxjs-interop';
+import { firstValueFrom } from 'rxjs';
+
 @Component({
   selector: 'app-admin-users',
   standalone: true,
@@ -27,14 +30,14 @@ import { User, UserRole } from '../../models/user.model';
     DialogModule,
     SelectModule,
     InputTextModule,
-    FormsModule,  
+    FormsModule,
     ReactiveFormsModule,
     MessageModule
   ],
   templateUrl: './users.html',
   styleUrl: './users.scss'
 })
-export class AdminUsers implements OnInit {
+export class AdminUsers {
 
   private userService = inject(UserService);
   private fb = inject(FormBuilder);
@@ -50,14 +53,29 @@ export class AdminUsers implements OnInit {
 
   userForm!: FormGroup;
 
-  roles: { label: string; value: UserRole }[] = [
-    { label: 'User', value: 'user' },
-    { label: 'Admin', value: 'admin' }
+  roles = [
+    { label: 'User', value: 'user' as UserRole },
+    { label: 'Admin', value: 'admin' as UserRole }
   ];
 
-  ngOnInit() {
+  // --- Load users as a signal ---
+  private usersSig = toSignal(
+    this.userService.getAllUsers(),
+    { initialValue: [] as User[] }
+  );
+
+  constructor() {
     this.initForm();
-    this.loadUsers();
+
+    // react when usersSig() emits
+    effect(() => {
+      const list = this.usersSig();
+      if (!list) return;
+
+      this.users = list;
+      this.filteredUsers = [...list];
+      this.loading = false;
+    });
   }
 
   initForm() {
@@ -68,27 +86,22 @@ export class AdminUsers implements OnInit {
     });
   }
 
-  loadUsers() {
-    this.userService.getAllUsers().subscribe({
-      next: (data: User[]) => {
-        this.users = data;
-        this.filteredUsers = data;
-        this.loading = false;
-      },
-      error: (err) => console.error(err)
-    });
-  }
-
+  // --------------------
+  // FILTER
+  // --------------------
   filterUsers() {
     const term = this.searchTerm.toLowerCase().trim();
 
     this.filteredUsers = this.users.filter((u) => {
-      const nameMatch = u.name?.toLowerCase().includes(term);
-      const emailMatch = u.email?.toLowerCase().includes(term);
-      return nameMatch || emailMatch;
+      const name = u.name?.toLowerCase().includes(term);
+      const email = u.email?.toLowerCase().includes(term);
+      return name || email;
     });
   }
 
+  // --------------------
+  // EDIT USER
+  // --------------------
   editUser(user: User) {
     this.selectedUser = user;
 
@@ -101,16 +114,27 @@ export class AdminUsers implements OnInit {
     this.userDialog = true;
   }
 
-  deleteUser(user: User) {
+  // --------------------
+  // DELETE USER
+  // --------------------
+  async deleteUser(user: User) {
     if (!confirm(`Delete user ${user.email}?`)) return;
 
-    this.userService.deleteUser(user._id).subscribe(() => {
+    try {
+      await firstValueFrom(this.userService.deleteUser(user._id));
+
       this.users = this.users.filter((u) => u._id !== user._id);
       this.filteredUsers = this.filteredUsers.filter((u) => u._id !== user._id);
-    });
+
+    } catch (err) {
+      console.error(err);
+    }
   }
 
-  saveUser() {
+  // --------------------
+  // SAVE USER
+  // --------------------
+  async saveUser() {
     if (this.userForm.invalid || !this.selectedUser) {
       this.userForm.markAllAsTouched();
       return;
@@ -118,14 +142,19 @@ export class AdminUsers implements OnInit {
 
     const payload = this.userForm.value;
 
-    this.userService.updateUser(this.selectedUser._id, payload).subscribe({
-      next: (updated: User) => {
-        const index = this.users.findIndex((u) => u._id === updated._id);
-        if (index !== -1) this.users[index] = updated;
+    try {
+      const updated = await firstValueFrom(
+        this.userService.updateUser(this.selectedUser._id, payload)
+      );
 
-        this.userDialog = false;
-      },
-      error: (err) => console.error(err)
-    });
+      const i = this.users.findIndex(u => u._id === updated._id);
+      if (i !== -1) this.users[i] = updated;
+
+      this.filteredUsers = [...this.users];
+      this.userDialog = false;
+
+    } catch (err) {
+      console.error(err);
+    }
   }
 }

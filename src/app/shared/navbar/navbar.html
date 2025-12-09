@@ -10,14 +10,23 @@
     <!-- CART ICON -->
     <button class="icon-btn cart-wrapper" routerLink="/cart">
       <i class="pi pi-shopping-cart"></i>
-      <span class="cart-badge" *ngIf="cart.getTotalItems() > 0">
-        {{ cart.getTotalItems() }}
-      </span>
+
+      @if (cart.getTotalItems() > 0) {
+        <span class="cart-badge">
+          {{ cart.getTotalItems() }}
+        </span>
+      }
     </button>
 
     <!-- POPUP MENU -->
     <p-menu #menu [model]="items" [popup]="true" appendTo="body"></p-menu>
-    <p-button icon="pi pi-ellipsis-v" (click)="menu.toggle($event)" styleClass="menu-btn" text></p-button>
+
+    <p-button 
+      icon="pi pi-ellipsis-v" 
+      (click)="menu.toggle($event)" 
+      styleClass="menu-btn" 
+      text>
+    </p-button>
 
   </div>
 

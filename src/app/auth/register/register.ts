@@ -8,7 +8,7 @@ import {
   AbstractControl,
   ValidationErrors,
 } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { ButtonModule } from 'primeng/button';
@@ -17,7 +17,8 @@ import { MessageModule } from 'primeng/message';
 import { CardModule } from 'primeng/card';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
-import { Router } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
+
 import { AuthService } from '../auth.service';
 
 @Component({
@@ -50,14 +51,10 @@ export class Register {
     private router: Router,
     private messageService: MessageService
   ) {
-    // ✅ Build form inside constructor (fixes fb-before-init)
     this.registerForm = new FormGroup(
       {
         name: this.fb.control('', [Validators.required]),
-        email: this.fb.control('', [
-          Validators.required,
-          Validators.email,
-        ]),
+        email: this.fb.control('', [Validators.required, Validators.email]),
         password: this.fb.control('', [
           Validators.required,
           Validators.minLength(6),
@@ -78,35 +75,23 @@ export class Register {
     const hasNumber = /[0-9]/.test(value);
     const hasSymbol = /[^A-Za-z0-9]/.test(value);
 
-    const valid = hasUpper && hasLower && hasNumber && hasSymbol;
-
-    return valid ? null : { weakPassword: true };
+    return hasUpper && hasLower && hasNumber && hasSymbol
+      ? null
+      : { weakPassword: true };
   }
 
-  // Getters
-  get name() {
-    return this.registerForm.get('name');
-  }
-  get email() {
-    return this.registerForm.get('email');
-  }
-  get password() {
-    return this.registerForm.get('password');
-  }
-  get confirmPassword() {
-    return this.registerForm.get('confirmPassword');
-  }
+  get name() { return this.registerForm.get('name'); }
+  get email() { return this.registerForm.get('email'); }
+  get password() { return this.registerForm.get('password'); }
+  get confirmPassword() { return this.registerForm.get('confirmPassword'); }
 
-  // Static cross-field validator
-  static passwordMatchValidator(
-    group: AbstractControl
-  ): ValidationErrors | null {
+  static passwordMatchValidator(group: AbstractControl): ValidationErrors | null {
     const pass = group.get('password')?.value;
     const confirm = group.get('confirmPassword')?.value;
     return pass === confirm ? null : { passwordMismatch: true };
   }
 
-  onSubmit() {
+  async onSubmit() {
     if (this.registerForm.invalid) {
       this.registerForm.markAllAsTouched();
       return;
@@ -115,28 +100,32 @@ export class Register {
     this.isLoading = true;
     this.errorMessage = '';
 
-    const { name, email, password } = this.registerForm.value;
+    try {
+      const { name, email, password } = this.registerForm.value;
 
-    this.auth.register({ name: name!, email: email!, password: password! }).subscribe({
-      next: (res) => {
-        this.isLoading = false;
-                // success toast
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Success',
-          detail: 'Registration complete! Please log in.'
-        });
+      await firstValueFrom(
+        this.auth.register({
+          name: name!,
+          email: email!,
+          password: password!
+        })
+      );
 
-        // redirect after short delay
-        setTimeout(() => {
-          this.router.navigate(['/login']);
-        }, 1500);
-      },
-      error: (err) => {
-        this.isLoading = false;
-        this.errorMessage =
-          err?.error?.message || 'Registration failed. Please try again.';
-      },
-    });
+      // Success Toast
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Success',
+        detail: 'Registration complete! Please log in.'
+      });
+
+      // Redirect after short delay
+      setTimeout(() => this.router.navigate(['/login']), 1500);
+
+    } catch (err: any) {
+      this.errorMessage =
+        err?.error?.message || 'Registration failed. Please try again.';
+    } finally {
+      this.isLoading = false;
+    }
   }
 }
