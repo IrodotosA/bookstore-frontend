@@ -17,8 +17,12 @@
 <!-- * * * * * * * * * * End of Placeholder  * * * * * * * * * * * * -->
 <!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
 
-<app-navbar *ngIf="!isAdminRoute()"></app-navbar>
+@if (!isAdminRoute()) {
+  <app-navbar></app-navbar>
+}
+
 <div class="main-content">
-    <router-outlet />
+  <router-outlet />
 </div>
+
 <app-footer></app-footer>

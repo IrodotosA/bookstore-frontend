@@ -12,27 +12,33 @@
         <div class="field">
           <label>Name</label>
           <input pInputText formControlName="name" />
-          <p-message 
-            *ngIf="pf['name'].touched && pf['name'].hasError('required')"
-            severity="error"
-            text="Name is required">
-          </p-message>
+
+          @if (pf['name'].touched && pf['name'].hasError('required')) {
+            <p-message 
+              severity="error"
+              text="Name is required">
+            </p-message>
+          }
         </div>
 
         <!-- EMAIL -->
         <div class="field">
           <label>Email</label>
           <input pInputText formControlName="email" />
-          <p-message 
-            *ngIf="pf['email'].touched && pf['email'].hasError('required')"
-            severity="error"
-            text="Email is required">
-          </p-message>
-          <p-message 
-            *ngIf="pf['email'].touched && pf['email'].hasError('email')"
-            severity="error"
-            text="Invalid email format">
-          </p-message>
+
+          @if (pf['email'].touched && pf['email'].hasError('required')) {
+            <p-message 
+              severity="error"
+              text="Email is required">
+            </p-message>
+          }
+
+          @if (pf['email'].touched && pf['email'].hasError('email')) {
+            <p-message 
+              severity="error"
+              text="Invalid email format">
+            </p-message>
+          }
         </div>
 
       </div>
@@ -58,51 +64,60 @@
         <div class="field">
           <label>Old Password</label>
           <input pInputText type="password" formControlName="oldPassword" />
-          <p-message 
-            *ngIf="pwf['oldPassword'].touched && pwf['oldPassword'].hasError('required')"
-            severity="error"
-            text="Old password is required">
-          </p-message>
+
+          @if (pwf['oldPassword'].touched && pwf['oldPassword'].hasError('required')) {
+            <p-message 
+              severity="error"
+              text="Old password is required">
+            </p-message>
+          }
         </div>
 
         <!-- NEW PASSWORD -->
         <div class="field">
           <label>New Password</label>
           <input pInputText type="password" formControlName="newPassword" />
-          <p-message 
-            *ngIf="pwf['newPassword'].touched && pwf['newPassword'].hasError('required')"
-            severity="error"
-            text="New password is required">
-          </p-message>
 
-          <p-message 
-            *ngIf="pwf['newPassword'].touched && pwf['newPassword'].hasError('minlength')"
-            severity="error"
-            text="Must be at least 6 characters">
-          </p-message>
+          @if (pwf['newPassword'].touched && pwf['newPassword'].hasError('required')) {
+            <p-message 
+              severity="error"
+              text="New password is required">
+            </p-message>
+          }
 
-          <p-message 
-            *ngIf="pwf['newPassword'].touched && pwf['newPassword'].hasError('weakPassword')"
-            severity="error"
-            text="Password must include uppercase, lowercase, number, and symbol">
-          </p-message>
+          @if (pwf['newPassword'].touched && pwf['newPassword'].hasError('minlength')) {
+            <p-message 
+              severity="error"
+              text="Must be at least 6 characters">
+            </p-message>
+          }
+
+          @if (pwf['newPassword'].touched && pwf['newPassword'].hasError('weakPassword')) {
+            <p-message 
+              severity="error"
+              text="Password must include uppercase, lowercase, number, and symbol">
+            </p-message>
+          }
         </div>
 
         <!-- CONFIRM PASSWORD -->
         <div class="field">
           <label>Confirm New Password</label>
           <input pInputText type="password" formControlName="confirmPassword" />
-          <p-message 
-            *ngIf="pwf['confirmPassword'].touched && pwf['confirmPassword'].hasError('required')"
-            severity="error"
-            text="Please confirm your password">
-          </p-message>
 
-          <p-message 
-            *ngIf="passwordForm.hasError('mismatch') && pwf['confirmPassword'].touched"
-            severity="error"
-            text="Passwords do not match">
-          </p-message>
+          @if (pwf['confirmPassword'].touched && pwf['confirmPassword'].hasError('required')) {
+            <p-message 
+              severity="error"
+              text="Please confirm your password">
+            </p-message>
+          }
+
+          @if (passwordForm.hasError('mismatch') && pwf['confirmPassword'].touched) {
+            <p-message 
+              severity="error"
+              text="Passwords do not match">
+            </p-message>
+          }
         </div>
 
       </div>

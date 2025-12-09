@@ -1,4 +1,5 @@
 <p-toast></p-toast>
+
 <div class="register-container">
   <p-card class="register-card">
     <h2>Create Account</h2>
@@ -15,11 +16,10 @@
         />
         <label for="name">Full Name</label>
       </p-floatLabel>
-      <p-message
-        *ngIf="name?.touched && name?.hasError('required')"
-        severity="error"
-        text="Name is required"
-      ></p-message>
+
+      @if (name?.touched && name?.hasError('required')) {
+        <p-message severity="error" text="Name is required"></p-message>
+      }
 
       <!-- EMAIL -->
       <p-floatLabel variant="on">
@@ -31,85 +31,73 @@
         />
         <label for="email">Email</label>
       </p-floatLabel>
-      <p-message
-        *ngIf="email?.touched && email?.hasError('required')"
-        severity="error"
-        text="Email is required"
-      ></p-message>
 
-      <p-message
-        *ngIf="email?.touched && email?.hasError('email')"
-        severity="error"
-        text="Please enter a valid email address"
-      ></p-message>
+      @if (email?.touched && email?.hasError('required')) {
+        <p-message severity="error" text="Email is required"></p-message>
+      }
 
-    <!-- PASSWORD -->
-    <div class="float-container">
-      <p-floatLabel variant="on">
-        <p-password
-          id="password"
-          formControlName="password"
-          [feedback]="false"
-          [toggleMask]="true"
-          inputStyleClass="password-input"
-          styleClass="password-wrapper"
-        ></p-password>
-        <label for="password">Password</label>
-      </p-floatLabel>
+      @if (email?.touched && email?.hasError('email')) {
+        <p-message severity="error" text="Please enter a valid email address"></p-message>
+      }
 
-      <p-message 
-        *ngIf="password?.touched && password?.hasError('required')"
-        severity="error"
-        text="Password is required">
-      </p-message>
+      <!-- PASSWORD -->
+      <div class="float-container">
+        <p-floatLabel variant="on">
+          <p-password
+            id="password"
+            formControlName="password"
+            [feedback]="false"
+            [toggleMask]="true"
+            inputStyleClass="password-input"
+            styleClass="password-wrapper"
+          ></p-password>
+          <label for="password">Password</label>
+        </p-floatLabel>
 
-      <p-message 
-        *ngIf="password?.touched && password?.hasError('minlength')"
-        severity="error"
-        text="Password must be at least 6 characters">
-      </p-message>
+        @if (password?.touched && password?.hasError('required')) {
+          <p-message severity="error" text="Password is required"></p-message>
+        }
 
-      <p-message 
-        *ngIf="password?.touched && password?.hasError('weakPassword')"
-        severity="error"
-        text="Password must include uppercase, lowercase, number, and symbol">
-      </p-message>
-    </div>
+        @if (password?.touched && password?.hasError('minlength')) {
+          <p-message severity="error" text="Password must be at least 6 characters"></p-message>
+        }
 
-    <!-- CONFIRM PASSWORD -->
-    <div class="float-container">
-      <p-floatLabel variant="on">
-        <p-password
-          id="confirmPassword"
-          formControlName="confirmPassword"
-          [feedback]="false"
-          [toggleMask]="true"
-          inputStyleClass="password-input"
-          styleClass="password-wrapper"
-        ></p-password>
-        <label for="confirmPassword">Confirm Password</label>
-      </p-floatLabel>
+        @if (password?.touched && password?.hasError('weakPassword')) {
+          <p-message severity="error" text="Password must include uppercase, lowercase, number, and symbol"></p-message>
+        }
+      </div>
 
-      <p-message
-        *ngIf="confirmPassword?.touched && confirmPassword?.hasError('required')"
-        severity="error"
-        text="Please confirm your password">
-      </p-message>
+      <!-- CONFIRM PASSWORD -->
+      <div class="float-container">
+        <p-floatLabel variant="on">
+          <p-password
+            id="confirmPassword"
+            formControlName="confirmPassword"
+            [feedback]="false"
+            [toggleMask]="true"
+            inputStyleClass="password-input"
+            styleClass="password-wrapper"
+          ></p-password>
+          <label for="confirmPassword">Confirm Password</label>
+        </p-floatLabel>
 
-      <p-message
-        *ngIf="registerForm.touched && registerForm.errors?.['passwordMismatch']"
-        severity="error"
-        text="Passwords do not match">
-      </p-message>
-    </div>
+        @if (confirmPassword?.touched && confirmPassword?.hasError('required')) {
+          <p-message severity="error" text="Please confirm your password"></p-message>
+        }
+
+        @if (registerForm.touched && registerForm.errors?.['passwordMismatch']) {
+          <p-message severity="error" text="Passwords do not match"></p-message>
+        }
+      </div>
 
       <!-- SERVER ERROR -->
-      <p-message
-        *ngIf="errorMessage"
-        severity="error"
-        [text]="errorMessage"
-        class="server-error"
-      ></p-message>
+      @if (errorMessage) {
+        <p-message
+          severity="error"
+          [text]="errorMessage"
+          class="server-error">
+        </p-message>
+      }
 
       <!-- SUBMIT BUTTON -->
       <button

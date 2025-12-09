@@ -19,83 +19,75 @@
         <div>
           <label>Name</label>
           <input pInputText formControlName="name" />
-          <p-message 
-            *ngIf="customer.get('name')?.hasError('required') && (customer.get('name')?.dirty || customer.get('name')?.touched)"
-            severity="error" 
-            text="Name is required">
-          </p-message>
+          @if (customer.get('name')?.hasError('required') && (customer.get('name')?.dirty || customer.get('name')?.touched)) {
+            <p-message severity="error" text="Name is required"></p-message>
+          }
         </div>
 
         <!-- EMAIL -->
         <div>
           <label>Email</label>
           <input pInputText type="email" formControlName="email" />
-          <p-message 
-            *ngIf="customer.get('email')?.hasError('required') && (customer.get('email')?.dirty || customer.get('email')?.touched)"
-            severity="error" 
-            text="Email is required">
-          </p-message>
-          <p-message 
-            *ngIf="customer.get('email')?.hasError('email') && (customer.get('email')?.dirty || customer.get('email')?.touched)"
-            severity="error" 
-            text="Invalid email format">
-          </p-message>
+
+          @if (customer.get('email')?.hasError('required') && (customer.get('email')?.dirty || customer.get('email')?.touched)) {
+            <p-message severity="error" text="Email is required"></p-message>
+          }
+
+          @if (customer.get('email')?.hasError('email') && (customer.get('email')?.dirty || customer.get('email')?.touched)) {
+            <p-message severity="error" text="Invalid email format"></p-message>
+          }
         </div>
 
         <!-- PHONE -->
         <div>
           <label>Phone</label>
           <input pInputText formControlName="phone" />
-          <p-message 
-            *ngIf="customer.get('phone')?.invalid && (customer.get('phone')?.dirty || customer.get('phone')?.touched)"
-            severity="error" 
-            text="Only numbers and + allowed">
-          </p-message>
+
+          @if (customer.get('phone')?.invalid && (customer.get('phone')?.dirty || customer.get('phone')?.touched)) {
+            <p-message severity="error" text="Only numbers and + allowed"></p-message>
+          }
         </div>
 
         <!-- ADDRESS -->
         <div>
           <label>Address</label>
           <input pInputText formControlName="address" />
-          <p-message 
-            *ngIf="customer.get('address')?.hasError('required') && (customer.get('address')?.dirty || customer.get('address')?.touched)"
-            severity="error" 
-            text="Address is required">
-          </p-message>
+
+          @if (customer.get('address')?.hasError('required') && (customer.get('address')?.dirty || customer.get('address')?.touched)) {
+            <p-message severity="error" text="Address is required"></p-message>
+          }
         </div>
 
         <!-- CITY -->
         <div>
           <label>City</label>
           <input pInputText formControlName="city" />
-          <p-message 
-            *ngIf="customer.get('city')?.hasError('required') && (customer.get('city')?.dirty || customer.get('city')?.touched)"
-            severity="error" 
-            text="City is required">
-          </p-message>
+
+          @if (customer.get('city')?.hasError('required') && (customer.get('city')?.dirty || customer.get('city')?.touched)) {
+            <p-message severity="error" text="City is required"></p-message>
+          }
         </div>
 
         <!-- POSTAL CODE -->
         <div>
           <label>Postal Code</label>
           <input pInputText formControlName="postalCode" />
-          <p-message 
-            *ngIf="customer.get('postalCode')?.invalid && (customer.get('postalCode')?.dirty || customer.get('postalCode')?.touched)"
-            severity="error" 
-            text="Postal code must contain only numbers">
-          </p-message>
+
+          @if (customer.get('postalCode')?.invalid && (customer.get('postalCode')?.dirty || customer.get('postalCode')?.touched)) {
+            <p-message severity="error" text="Postal code must contain only numbers"></p-message>
+          }
         </div>
 
         <!-- COUNTRY -->
         <div>
           <label>Country</label>
           <input pInputText formControlName="country" />
-          <p-message 
-            *ngIf="customer.get('country')?.hasError('required') && (customer.get('country')?.dirty || customer.get('country')?.touched)"
-            severity="error" 
-            text="Country is required">
-          </p-message>
+
+          @if (customer.get('country')?.hasError('required') && (customer.get('country')?.dirty || customer.get('country')?.touched)) {
+            <p-message severity="error" text="Country is required"></p-message>
+          }
         </div>
+
       </div>
 
       <h2>Payment Method</h2>
@@ -118,84 +110,80 @@
       </div>
 
       <!-- CARD FORM -->
-      <div class="card-form" *ngIf="checkoutForm.get('paymentMethod')?.value === 'card'" formGroupName="card">
+      @if (checkoutForm.get('paymentMethod')?.value === 'card') {
+        <div class="card-form" formGroupName="card">
 
-        <h3>Card Details</h3>
+          <h3>Card Details</h3>
 
-        <div class="form-grid">
+          <div class="form-grid">
 
-          <!-- CARD NUMBER -->
-          <div>
-            <label>Card Number</label>
-            <input pInputText formControlName="number" />
-            <p-message 
-              *ngIf="checkoutForm.hasError('cardIncomplete') && (card.get('number')?.dirty || card.get('number')?.touched)"
-              severity="error"
-              text="Card number is required">
-            </p-message>
+            <!-- CARD NUMBER -->
+            <div>
+              <label>Card Number</label>
+              <input pInputText formControlName="number" />
+
+              @if (checkoutForm.hasError('cardIncomplete') && (card.get('number')?.dirty || card.get('number')?.touched)) {
+                <p-message severity="error" text="Card number is required"></p-message>
+              }
+            </div>
+
+            <!-- NAME -->
+            <div>
+              <label>Name on Card</label>
+              <input pInputText formControlName="name" />
+
+              @if (checkoutForm.hasError('cardIncomplete') && (card.get('name')?.dirty || card.get('name')?.touched)) {
+                <p-message severity="error" text="Card name is required"></p-message>
+              }
+            </div>
+
+            <!-- EXP -->
+            <div>
+              <label>Expiration (MM/YY)</label>
+              <input pInputText formControlName="exp" />
+
+              @if (checkoutForm.hasError('cardIncomplete') && (card.get('exp')?.dirty || card.get('exp')?.touched)) {
+                <p-message severity="error" text="Expiration is required"></p-message>
+              }
+
+              @if (checkoutForm.hasError('invalidExpFormat') && (card.get('exp')?.dirty || card.get('exp')?.touched)) {
+                <p-message severity="error" text="Invalid format (MM/YY)"></p-message>
+              }
+            </div>
+
+            <!-- CVV -->
+            <div>
+              <label>CVV</label>
+              <input pInputText formControlName="cvv" />
+
+              @if (checkoutForm.hasError('cardIncomplete') && (card.get('cvv')?.dirty || card.get('cvv')?.touched)) {
+                <p-message severity="error" text="CVV is required"></p-message>
+              }
+            </div>
+
           </div>
 
-          <!-- NAME -->
-          <div>
-            <label>Name on Card</label>
-            <input pInputText formControlName="name" />
+          @if (checkoutForm.hasError('invalidCard')) {
             <p-message 
-              *ngIf="checkoutForm.hasError('cardIncomplete') && (card.get('name')?.dirty || card.get('name')?.touched)"
               severity="error"
-              text="Card name is required">
+              text="Card is invalid. Use one of the test cards below.">
             </p-message>
-          </div>
+          }
 
-          <!-- EXP -->
-          <div>
-            <label>Expiration (MM/YY)</label>
-            <input pInputText formControlName="exp" />
-              <!-- EMPTY FIELD (cardIncomplete) -->
-            <p-message 
-              *ngIf="checkoutForm.hasError('cardIncomplete') 
-                    && (card.get('exp')?.dirty || card.get('exp')?.touched)"
-              severity="error"
-              text="Expiration is required">
-            </p-message>
-
-            <!-- WRONG FORMAT -->
-            <p-message 
-              *ngIf="checkoutForm.hasError('invalidExpFormat') 
-                    && (card.get('exp')?.dirty || card.get('exp')?.touched)"
-              severity="error"
-              text="Invalid format (MM/YY)">
-            </p-message>
-          </div>
-
-          <!-- CVV -->
-          <div>
-            <label>CVV</label>
-            <input pInputText formControlName="cvv" />
-            <p-message 
-              *ngIf="checkoutForm.hasError('cardIncomplete') && (card.get('cvv')?.dirty || card.get('cvv')?.touched)"
-              severity="error"
-              text="CVV is required">
-            </p-message>
+          <div class="test-card-box">
+            <h4>Test Cards</h4>
+            <ul>
+              @for (t of testCards; track t.number) {
+                <li>
+                  <strong>{{ t.type }}:</strong>
+                  {{ t.number }} — Exp: {{ t.exp }} — CVV: {{ t.cvv }}
+                </li>
+              }
+            </ul>
           </div>
 
         </div>
-
-        <p-message 
-          *ngIf="checkoutForm.hasError('invalidCard')"
-          severity="error"
-          text="Card is invalid. Use one of the test cards below.">
-        </p-message>
-
-        <div class="test-card-box">
-          <h4>Test Cards</h4>
-          <ul>
-            <li *ngFor="let t of testCards">
-              <strong>{{ t.type }}:</strong> {{ t.number }} — Exp: {{ t.exp }} — CVV: {{ t.cvv }}
-            </li>
-          </ul>
-        </div>
-
-      </div>
+      }
 
       <button 
         pButton 
@@ -212,10 +200,12 @@
       <h2>Your Order</h2>
 
       <div class="summary-list">
-        <div class="summary-item" *ngFor="let item of items">
-          <span>{{ item.title }} (x{{ item.quantity }})</span>
-          <span>€{{ item.price * item.quantity | number:'1.2-2' }}</span>
-        </div>
+        @for (item of items; track item._id) {
+          <div class="summary-item">
+            <span>{{ item.title }} (x{{ item.quantity }})</span>
+            <span>€{{ item.price * item.quantity | number:'1.2-2' }}</span>
+          </div>
+        }
       </div>
 
       <hr />

@@ -17,11 +17,13 @@
         placeholder="Your Name"
         formControlName="name"
       />
-      <p-message 
-        *ngIf="f['name'].touched && f['name'].hasError('required')"
-        severity="error"
-        text="Name is required">
-      </p-message>
+
+      @if (f['name'].touched && f['name'].hasError('required')) {
+        <p-message
+          severity="error"
+          text="Name is required">
+        </p-message>
+      }
     </div>
 
     <!-- EMAIL -->
@@ -32,17 +34,20 @@
         placeholder="Your Email"
         formControlName="email"
       />
-      <p-message 
-        *ngIf="f['email'].touched && f['email'].hasError('required')"
-        severity="error"
-        text="Email is required">
-      </p-message>
 
-      <p-message 
-        *ngIf="f['email'].touched && f['email'].hasError('email')"
-        severity="error"
-        text="Invalid email format">
-      </p-message>
+      @if (f['email'].touched && f['email'].hasError('required')) {
+        <p-message
+          severity="error"
+          text="Email is required">
+        </p-message>
+      }
+
+      @if (f['email'].touched && f['email'].hasError('email')) {
+        <p-message
+          severity="error"
+          text="Invalid email format">
+        </p-message>
+      }
     </div>
 
     <!-- SUBJECT -->
@@ -53,11 +58,13 @@
         placeholder="Subject"
         formControlName="subject"
       />
-      <p-message 
-        *ngIf="f['subject'].touched && f['subject'].hasError('required')"
-        severity="error"
-        text="Subject is required">
-      </p-message>
+
+      @if (f['subject'].touched && f['subject'].hasError('required')) {
+        <p-message
+          severity="error"
+          text="Subject is required">
+        </p-message>
+      }
     </div>
 
     <!-- MESSAGE -->
@@ -67,11 +74,13 @@
         placeholder="Your Message"
         formControlName="message"
       ></textarea>
-      <p-message 
-        *ngIf="f['message'].touched && f['message'].hasError('required')"
-        severity="error"
-        text="Message cannot be empty">
-      </p-message>
+
+      @if (f['message'].touched && f['message'].hasError('required')) {
+        <p-message
+          severity="error"
+          text="Message cannot be empty">
+        </p-message>
+      }
     </div>
 
     <!-- BUTTON -->
@@ -85,8 +94,10 @@
 
   </form>
 
-  <p *ngIf="success" [class.ok]="success.ok" [class.error]="!success.ok">
-    {{ success.msg }}
-  </p>
+  @if (success) {
+    <p [class.ok]="success.ok" [class.error]="!success.ok">
+      {{ success.msg }}
+    </p>
+  }
 
 </section>

@@ -4,6 +4,7 @@
 
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
       <div class="form-grid">
+
         <!-- EMAIL -->
         <div>
           <p-floatLabel variant="on">
@@ -17,17 +18,19 @@
             <label for="email">Email</label>
           </p-floatLabel>
 
-          <p-message
-            *ngIf="email?.touched && email?.hasError('required')"
-            severity="error"
-            text="Email is required">
-          </p-message>
+          @if (email?.touched && email?.hasError('required')) {
+            <p-message
+              severity="error"
+              text="Email is required">
+            </p-message>
+          }
 
-          <p-message
-            *ngIf="email?.touched && email?.hasError('email')"
-            severity="error"
-            text="Enter a valid email">
-          </p-message>
+          @if (email?.touched && email?.hasError('email')) {
+            <p-message
+              severity="error"
+              text="Enter a valid email">
+            </p-message>
+          }
         </div>
 
         <!-- PASSWORD -->
@@ -43,28 +46,32 @@
             ></p-password>
             <label for="password">Password</label>
           </p-floatLabel>
-          
-          <p-message
-            *ngIf="password?.touched && password?.hasError('required')"
-            severity="error"
-            text="Password is required">
-          </p-message>
 
-          <p-message
-            *ngIf="password?.touched && password?.hasError('minlength')"
-            severity="error"
-            text="Must be at least 6 characters">
-          </p-message>
+          @if (password?.touched && password?.hasError('required')) {
+            <p-message
+              severity="error"
+              text="Password is required">
+            </p-message>
+          }
+
+          @if (password?.touched && password?.hasError('minlength')) {
+            <p-message
+              severity="error"
+              text="Must be at least 6 characters">
+            </p-message>
+          }
         </div>
+
       </div>
 
       <!-- backend error -->
-      <p-message
-        *ngIf="errorMessage"
-        severity="error"
-        [text]="errorMessage"
-        class="server-error">
-      </p-message>
+      @if (errorMessage) {
+        <p-message
+          severity="error"
+          [text]="errorMessage"
+          class="server-error">
+        </p-message>
+      }
 
       <button
         pButton

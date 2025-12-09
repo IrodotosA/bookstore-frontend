@@ -22,7 +22,8 @@
     (onRowExpand)="onRowExpand($event)"
     (onRowCollapse)="onRowCollapse($event)"
   >
-    <!-- CAPTION: Expand / Collapse all -->
+
+    <!-- CAPTION -->
     <ng-template #caption>
       <div class="flex flex-wrap justify-end gap-2">
         <p-button label="Expand All" icon="pi pi-plus" text (onClick)="expandAll()" />
@@ -96,7 +97,7 @@
       </tr>
     </ng-template>
 
-    <!-- EXPANDED ROW (MUST be #expandedrow, EXACTLY like docs) -->
+    <!-- EXPANDED ROW -->
     <ng-template #expandedrow let-order>
       <tr>
         <td colspan="6">
@@ -104,6 +105,7 @@
 
             <h4>Items</h4>
             <ul>
+              <!-- Cannot convert to @for because inside ng-template -->
               <li *ngFor="let item of order.items">
                 {{ item.title }} (x{{ item.quantity }})
               </li>
@@ -127,6 +129,7 @@
                 {{ order.paymentMethod === 'cod' ? 'Cash on Delivery' : 'Card' }}
               </p>
 
+              <!-- Cannot convert because inside ng-template -->
               <p *ngIf="order.paymentMethod !== 'cod'">
                 <strong>Card:</strong> **** **** {{ order.cardLast4 }}
               </p>
@@ -139,94 +142,92 @@
     </ng-template>
   </p-table>
 
+  <!-- ORDER DIALOG -->
   <p-dialog
     [(visible)]="orderDialog"
     [modal]="true"
     [style]="{ width: '90vw', maxWidth: '850px' }"
     header="Edit Order"
   >
+
     <form [formGroup]="orderForm" class="form-grid">
 
-      <!-- BILLING SECTION -->
       <h3>Billing Information</h3>
 
       <div formGroupName="billing" class="form-grid">
+
+        <!-- Name -->
         <div class="field">
           <label>Name</label>
           <input pInputText formControlName="name" />
 
-          <p-message
-            *ngIf="billing.get('name')?.touched && billing.get('name')?.hasError('required')"
-            severity="error"
-            text="Name is required"
-          ></p-message>
+          @if (billing.get('name')?.touched && billing.get('name')?.hasError('required')) {
+            <p-message severity="error" text="Name is required"></p-message>
+          }
         </div>
 
+        <!-- Email -->
         <div class="field">
           <label>Email</label>
           <input pInputText formControlName="email" />
 
-          <p-message
-            *ngIf="billing.get('email')?.touched && billing.get('email')?.hasError('required')"
-            severity="error"
-            text="Email is required"
-          ></p-message>
+          @if (billing.get('email')?.touched && billing.get('email')?.hasError('required')) {
+            <p-message severity="error" text="Email is required"></p-message>
+          }
 
-          <p-message
-            *ngIf="billing.get('email')?.touched && billing.get('email')?.hasError('email')"
-            severity="error"
-            text="Invalid email format"
-          ></p-message>
+          @if (billing.get('email')?.touched && billing.get('email')?.hasError('email')) {
+            <p-message severity="error" text="Invalid email format"></p-message>
+          }
         </div>
 
+        <!-- Phone -->
         <div class="field">
           <label>Phone</label>
           <input pInputText formControlName="phone" />
-          <p-message
-            *ngIf="billing.get('phone')?.touched && billing.get('phone')?.hasError('required')"
-            severity="error"
-            text="Phone is required"
-          ></p-message>
+
+          @if (billing.get('phone')?.touched && billing.get('phone')?.hasError('required')) {
+            <p-message severity="error" text="Phone is required"></p-message>
+          }
         </div>
 
+        <!-- Address -->
         <div class="field">
           <label>Address</label>
           <input pInputText formControlName="address" />
-          <p-message
-            *ngIf="billing.get('address')?.touched && billing.get('address')?.hasError('required')"
-            severity="error"
-            text="Address is required"
-          ></p-message>
+
+          @if (billing.get('address')?.touched && billing.get('address')?.hasError('required')) {
+            <p-message severity="error" text="Address is required"></p-message>
+          }
         </div>
 
+        <!-- City -->
         <div class="field">
           <label>City</label>
           <input pInputText formControlName="city" />
-          <p-message
-            *ngIf="billing.get('city')?.touched && billing.get('city')?.hasError('required')"
-            severity="error"
-            text="City is required"
-          ></p-message>
+
+          @if (billing.get('city')?.touched && billing.get('city')?.hasError('required')) {
+            <p-message severity="error" text="City is required"></p-message>
+          }
         </div>
 
+        <!-- Postal Code -->
         <div class="field">
           <label>Postal Code</label>
           <input pInputText formControlName="postalCode" />
-          <p-message
-            *ngIf="billing.get('postalCode')?.touched && billing.get('postalCode')?.hasError('required')"
-            severity="error"
-            text="Postal Code is required"
-          ></p-message>
+
+          @if (billing.get('postalCode')?.touched && billing.get('postalCode')?.hasError('required')) {
+            <p-message severity="error" text="Postal Code is required"></p-message>
+          }
         </div>
 
+        <!-- Country -->
         <div class="field">
           <label>Country</label>
           <input pInputText formControlName="country" />
-          <p-message
-            *ngIf="billing.get('country')?.touched && billing.get('country')?.hasError('required')"
-            severity="error"
-            text="Country is required"
-          ></p-message>
+
+          @if (billing.get('country')?.touched && billing.get('country')?.hasError('required')) {
+            <p-message severity="error" text="Country is required"></p-message>
+          }
         </div>
       </div>
 
@@ -245,6 +246,7 @@
         </thead>
 
         <tbody>
+          <!-- Cannot convert: inside template + needs formArrayName -->
           <tr *ngFor="let item of itemsArray.controls; let i = index" [formGroupName]="i">
             <td>
               <input pInputText (blur)="item.get('title')?.markAsTouched()" formControlName="title" />
