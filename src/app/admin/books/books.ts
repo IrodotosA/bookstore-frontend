@@ -237,8 +237,18 @@ export class AdminBooks implements OnInit {
         const idx = this.books.findIndex(
           (b) => b._id === this.selectedBook!._id
         );
+        
         if (idx !== -1) {
-          this.books[idx] = updated;
+
+          // Replace book
+          this.books = [
+            ...this.books.slice(0, idx),
+            updated,
+            ...this.books.slice(idx + 1)
+          ];
+
+          // Also update filtered list
+          this.filteredBooks = [...this.books];
         }
 
         this.resetFormState();
