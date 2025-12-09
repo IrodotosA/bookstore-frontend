@@ -23,7 +23,7 @@ export class Navbar implements OnInit {
 
   // Convert authState$ observable → signal
   authState = toSignal(this.auth.authState$, { initialValue: null });
-
+  user = toSignal(this.auth.user$, { initialValue: this.auth.getUser() });
   isScrolled = false;
   items: MenuItem[] = [];
 
@@ -39,6 +39,7 @@ export class Navbar implements OnInit {
     // Reactively rebuild menu whenever auth state changes
     effect(() => {
       this.authState();
+      this.user();
       this.buildMenu();
     });
   }

@@ -80,8 +80,22 @@ export class Settings implements OnInit {
     }
 
     try {
-      const res = await firstValueFrom(this.userService.updateMyProfile(this.profileForm.value));
+      const res = await firstValueFrom(
+        this.userService.updateMyProfile(this.profileForm.value)
+      );
+
+      // 1️⃣ Save new token (refreshes user payload)
       this.auth.saveToken(res.token);
+
+      // 2️⃣ Update global user state → navbar updates instantly
+      this.auth.setUser(res.user);
+
+      // 3️⃣ Optional but recommended: update form with latest values
+      this.profileForm.patchValue({
+        name: res.user.name,
+        email: res.user.email,
+      });
+
       alert('Profile updated successfully');
     } catch (err) {
       alert('Failed to update profile');

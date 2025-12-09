@@ -11,43 +11,49 @@ import { User } from '../models/user.model';
   providedIn: 'root',
 })
 export class AuthService {
-
   private apiUrl = environment.apiUrl;
+
+  // 🔥 NEW: Reactive user state
+  private userSubject = new BehaviorSubject<User | null>(this.getUser());
+  user$ = this.userSubject.asObservable();
 
   private authState = new BehaviorSubject<boolean>(this.isLoggedIn());
   authState$ = this.authState.asObservable();
 
   constructor(private http: HttpClient) {}
 
-  // -----------------------------------------------------
-  // LOGIN (token only)
-  // -----------------------------------------------------
+  // ----------------------------
+  // LOGIN
+  // ----------------------------
   login(credentials: { email: string; password: string }): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.apiUrl}/auth/login`, credentials);
   }
 
-  // -----------------------------------------------------
-  // REGISTER (token only)
-  // -----------------------------------------------------
+  // ----------------------------
+  // REGISTER
+  // ----------------------------
   register(data: { name: string; email: string; password: string }): Observable<RegisterResponse> {
     return this.http.post<RegisterResponse>(`${this.apiUrl}/auth/register`, data);
   }
 
-  // -----------------------------------------------------
-  // TOKEN MANAGEMENT
-  // -----------------------------------------------------
+  // ----------------------------
+  // TOKEN
+  // ----------------------------
   saveToken(token: string) {
     localStorage.setItem('token', token);
     this.authState.next(true);
+
+    // 🔥 also refresh user state from the new token
+    this.userSubject.next(this.getUser());
   }
 
   getToken(): string | null {
     return localStorage.getItem('token');
   }
 
-  // -----------------------------------------------------
-  // EXTRACT USER FROM JWT PAYLOAD
-  // -----------------------------------------------------
+  // ----------------------------
+  // USER MANAGEMENT
+  // ----------------------------
   getUser(): User | null {
     const token = this.getToken();
     if (!token) return null;
@@ -60,15 +66,21 @@ export class AuthService {
     }
   }
 
-  // -----------------------------------------------------
-  // AUTH HELPERS
-  // -----------------------------------------------------
+  // 🔥 NEW: Set user after updateMe()
+  setUser(user: User) {
+    this.userSubject.next(user);
+  }
+
+  // ----------------------------
+  // HELPERS
+  // ----------------------------
   isLoggedIn(): boolean {
     return !!localStorage.getItem('token');
   }
 
   logout() {
     localStorage.removeItem('token');
+    this.userSubject.next(null); // clear user
     this.authState.next(false);
   }
 
